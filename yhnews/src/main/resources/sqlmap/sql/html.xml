@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="HTML">
+	
+    <typeAlias alias="html" type="com.module.html.dto.HtmlDto"/>
+    
+    <sql id="viewColumn">
+    	PAGE_SEQ
+    ,	TITLE
+    ,	HTML
+    ,	STATUS
+    ,	REG_DATE		
+    </sql>	
+    
+    <sql id="listColumn">
+    	PAGE_SEQ
+    ,	TITLE    
+    ,	STATUS
+    ,	REG_DATE		
+    </sql>
+	
+	<sql id="search">
+		WHERE STATUS IN ('Y','N')
+		<isNotEmpty prepend="AND" property="search_keyword">
+			<isEqual property="search_type" compareValue="1">
+				TITLE LIKE #db_search_keyword#
+			</isEqual>
+			<isEqual property="search_type" compareValue="2">
+				HTML LIKE #db_search_keyword#
+			</isEqual>
+		</isNotEmpty>
+	</sql>
+	
+	<select id="getHtmlList" resultClass="html">
+	/* HTML.getHtmlList */
+	
+	SELECT <include refid="listColumn"/> FROM  HTML_PAGE
+	<include refid="search"/>
+	ORDER BY TITLE
+	</select>
+	
+	<select id="getHtmlInfo" resultClass="html">
+	/* HTML.getHtmlInfo */
+	
+	SELECT <include refid="viewColumn"/> FROM  HTML_PAGE	
+	WHERE PAGE_SEQ = #page_seq#
+	AND STATUS IN ('Y','N')
+	</select>
+	
+	<insert id="insertHtmlInfo">
+	/* HTML.insertHtmlInfo */
+	
+	INSERT INTO HTML_PAGE
+	(
+		TITLE
+	,	HTML
+	,	STATUS
+	,	REG_DATE
+	,	MOD_DATE	
+	) VALUES (
+		#title#
+	,	#html#
+	,	#status#
+	,	NOW()
+	,	NOW()
+	)
+	</insert>
+	
+	<update id="updateHtmlInfo">
+	/* HTML.updateHtmlInfo */
+	
+	UPDATE HTML_PAGE SET 
+		TITLE = #title#
+	,	HTML = #html#
+	,	STATUS = #status#
+	,	MOD_DATE = NOW()
+	WHERE PAGE_SEQ = #page_seq#
+	</update>
+	
+	<update id="deleteHtmlInfo">
+	/* HTML.deleteHtmlInfo */
+	
+	UPDATE HTML_PAGE SET
+		STATUS = 'D'
+	,	MOD_DATE = NOW()
+	WHERE PAGE_SEQ = #page_seq#
+	</update>
+	
+</sqlMap>

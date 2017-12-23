@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="BANNER">
+	
+    <typeAlias alias="banner" type="com.module.banner.dto.BannerDto"/>
+    
+    <sql id="column">
+    	BANNER_KEY
+    ,	TITLE
+    ,	CONTENT
+    ,	AREA_CODE
+    ,	TYPE1    
+    ,	LINK_ADDRESS
+    ,	IS_NEW_WINDOW
+    ,	ORDER_LEVEL   	
+   	,	START_SHOW_DATE
+   	,	END_SHOW_DATE
+   	,	REAL_FILE_NAME
+   	,	SAVE_FILE_NAME
+   	,	FILE_PATH
+   	,	STATUS
+   	,	REG_DATE	
+    </sql>
+
+	<update id="updateBannerFileInfo">
+	/* BANNER.updateBannerFileInfo */
+	
+	UPDATE BANNER_INFO SET
+   		REAL_FILE_NAME = #real_file_name#
+   	,	SAVE_FILE_NAME = #save_file_name#
+   	,	FILE_PATH = #file_path#
+   	WHERE BANNER_KEY = #banner_key#
+	</update>
+	
+	<insert id="insertBannerInfo">
+	/*	BANNER.insertBannerInfo */
+	
+	INSERT INTO BANNER_INFO
+	(
+		TITLE
+	,	CONTENT	
+    ,	LINK_ADDRESS
+    ,	IS_NEW_WINDOW
+    ,	AREA_CODE
+    ,	TYPE1
+   	,	ORDER_LEVEL   	
+   	,	START_SHOW_DATE
+   	,	END_SHOW_DATE
+   	,	REAL_FILE_NAME
+   	,	SAVE_FILE_NAME
+   	,	FILE_PATH
+   	,	STATUS
+   	,	REG_DATE
+   	,	MOD_DATE
+	) VALUES (
+		#title#
+	,	#content#	
+    ,	#link_address#
+    ,	#is_new_window#
+    ,	#area_code#
+    ,	#type1#
+   	,	#order_level#   	
+   	,	#start_show_date#
+   	,	#end_show_date#
+   	,	#real_file_name#
+   	,	#save_file_name#
+   	,	#file_path#
+   	,	#status#
+   	,	NOW()
+   	,	NOW()
+	)
+	
+		<selectKey resultClass="int" >
+		SELECT @@IDENTITY AS BANNER_KEY
+		</selectKey>
+	</insert>
+	
+	<update id="updateBannerInfo">
+	/* BANNER.updateBannerInfo */
+	
+	UPDATE BANNER_INFO SET
+		MOD_DATE  = NOW()
+	,	TITLE = #title#	
+	,	CONTENT = #content#
+	,	AREA_CODE = #area_code#
+	,	TYPE1 = #type1#
+	,	LINK_ADDRESS = #link_address#
+	,	IS_NEW_WINDOW = #is_new_window#    
+   	,	ORDER_LEVEL = #order_level#   	
+   	,	START_SHOW_DATE = #start_show_date#
+   	,	END_SHOW_DATE = #end_show_date#
+   	,	REAL_FILE_NAME = #real_file_name#
+   	,	SAVE_FILE_NAME = #save_file_name#
+   	,	FILE_PATH = #file_path#
+   	,	STATUS = #status#
+   	WHERE BANNER_KEY = #banner_key#
+	</update>
+	
+	<update id="deleteBannerInfo">
+	/* BANNER.deleteBannerInfo */
+	
+	UPDATE BANNER_INFO SET
+		MOD_DATE  = NOW()
+   	,	STATUS = 'D'
+   	WHERE BANNER_KEY = #banner_key#
+	</update>
+	
+	<select id="getBannerInfo" resultClass="banner">
+	/* BANNER.getBannerInfo */
+	
+	SELECT <include refid="column"/> FROM BANNER_INFO
+	WHERE STATUS IN ('Y','N')
+	AND BANNER_KEY = #banner_key#
+	</select>
+	
+	<select id="getBannerTotalCount" resultClass="int">
+	/* BANNER.getBannerTotalCount */
+	
+	SELECT COUNT(*) AS TOTAL_COUNT FROM BANNER_INFO
+	WHERE STATUS IN ('Y','N')
+	AND AREA_CODE = #area_code#
+	</select>
+	
+	<select id="getBannerList" resultClass="banner">
+	/* BANNER.getBannerList */
+	
+	SELECT 
+		<include refid="column"/>
+	<![CDATA[
+	,	CASE 
+		WHEN START_SHOW_DATE <= date_format(sysdate(),'%Y-%m-%d') 
+			AND END_SHOW_DATE >= date_format(sysdate(),'%Y-%m-%d') THEN 'Y'
+		ELSE 'N' 
+		END AS IS_SHOW_YN
+	]]>			 
+	FROM BANNER_INFO
+	WHERE STATUS IN ('Y','N')
+	AND AREA_CODE = #area_code#
+	ORDER BY ORDER_LEVEL ASC
+	LIMIT #recordRowNum# , #pageSize#
+	</select>
+	
+	<select id="getMainBannerList" resultClass="banner">
+	/* BANNER.getMainBannerList */
+	
+	SELECT <include refid="column"/> FROM BANNER_INFO
+	WHERE STATUS = 'Y'
+	AND AREA_CODE = #area_code#
+	<![CDATA[
+	AND START_SHOW_DATE <= date_format(sysdate(),'%Y-%m-%d')
+	AND END_SHOW_DATE >= date_format(sysdate(),'%Y-%m-%d')
+	]]>
+	ORDER BY ORDER_LEVEL ASC
+	</select>
+	
+</sqlMap>

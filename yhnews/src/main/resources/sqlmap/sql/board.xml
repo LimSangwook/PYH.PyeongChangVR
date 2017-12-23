@@ -1,0 +1,682 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="BOARD">
+	
+    <typeAlias alias="board" type="com.module.board.dto.BoardDto"/>
+    <typeAlias alias="boardConfig" type="com.module.board.dto.BoardConfigDto"/>
+    <typeAlias alias="boardCategory" type="com.module.board.dto.BoardCategoryDto"/>
+        
+    <sql id="boardConfigColumn">            	
+    	BOARD_NAME
+	,	BOARD_TYPE
+	,	NOTICE_USE_YN
+	,	COMMENT_USE_YN
+	,	REPLY_USE_YN
+	,	CATE_USE_YN
+	,	SECRET_USE_YN
+	,	EDITOR_USE_YN
+	,	PAGE_LIST_SIZE
+	,	PAGE_BLOCK_SIZE
+	,	WRITE_LIMIT
+	,	REPLY_LIMIT
+	,	FILE_COUNT_LIMIT
+	,	FILE_SIZE_LIMIT
+	,	FILE_EXT_LIMIT
+	,	STATUS	
+	,	REG_DATE
+    </sql>
+    
+    <sql id="boardListColumn">
+    	BOARD_KEY
+    ,	BOARD_ID
+    ,	CATE_ID
+    ,	PARENT_BOARD_KEY
+    ,	ORDER_STEP
+    ,	TITLE
+    ,	SUMMARY
+    ,	IS_SECRET
+    ,	READ_CNT
+    ,	COMMENT_CNT
+    ,	ATTACH_CNT
+    ,	MASTER_IMAGE
+    ,	START_DAY
+    ,	END_DAY
+    ,	ADD_FIELD1
+    ,	ADD_FIELD2
+    ,	ADD_FIELD3
+    ,	STATUS
+    ,	REG_ID
+    ,	REG_NAME
+    ,	REG_DATE
+    </sql>
+    
+    <sql id="boardViewColumn">
+    	BOARD_KEY
+    ,	BOARD_ID
+    ,	CATE_ID
+    ,	PARENT_BOARD_KEY
+    ,	ORDER_GROUP
+    ,	ORDER_STEP
+    ,	TITLE
+    ,	SUMMARY
+    ,	VIDEO_TYPE
+    ,	LINK_ADDRESS
+    ,	CONTENT
+    ,	IS_NOTICE
+    ,	IS_SECRET
+    ,	READ_CNT
+    ,	COMMENT_CNT
+    ,	ATTACH_CNT
+    ,	MASTER_IMAGE
+    ,	START_DAY
+    ,	END_DAY
+    ,	ADD_FIELD1
+    ,	ADD_FIELD2
+    ,	ADD_FIELD3
+    ,	STATUS
+    ,	IP
+    ,	REG_ID
+    ,	REG_NAME
+    ,	REG_DATE
+    ,	MOD_DATE
+    </sql>
+    
+    <sql id="boardSearch">         
+    	<dynamic>
+    	    
+    	    <isEmpty prepend="AND" property="status">
+    	  	STATUS IN ('Y','N')
+    	    </isEmpty>
+    	    <isNotEmpty prepend="AND" property="status">    	        
+    	    STATUS = 'Y'    
+    	    </isNotEmpty>
+    	    
+	    	<isNotEmpty prepend="AND" property="board_id">
+	    		BOARD_ID = #board_id#
+	    	</isNotEmpty>
+	    	<isNotEmpty prepend="AND" property="cate_id">
+	    		CATE_ID = #cate_id#
+	    	</isNotEmpty>
+	    	<isNotEmpty prepend="AND" property="search_keyword">
+				<isEqual property="search_type" compareValue="1">
+					TITLE LIKE #db_search_keyword#
+				</isEqual>
+				<isEqual property="search_type" compareValue="2">
+					CONTENT LIKE #db_search_keyword#
+				</isEqual>
+				<isEqual property="search_type" compareValue="3">
+					REG_NAME LIKE #db_search_keyword#
+				</isEqual>
+			</isNotEmpty>
+    	</dynamic>
+    </sql>
+    
+    <sql id="boardOrder">
+		<dynamic>
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="1"> ORDER_GROUP </isEqual>
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="2"> TITLE </isEqual>						
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="3"> READ_CNT </isEqual>			
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="4"> CATE_ID </isEqual>
+		</dynamic>		
+	</sql>
+	
+    <!-- 게시글 관리 -->
+    <insert id="insertBoard">
+    /* BOARD.insertBoard */
+    
+    INSERT INTO BOARD(
+    	BOARD_ID
+    ,	CATE_ID
+    ,	PARENT_BOARD_KEY
+    ,	ORDER_GROUP
+    ,	ORDER_STEP
+    ,	ORDER_LEVEL
+    ,	TITLE
+    ,	SUMMARY
+    ,	VIDEO_TYPE
+    ,	LINK_ADDRESS
+    ,	CONTENT
+    ,	IS_NOTICE
+    ,	IS_SECRET
+    ,	PASSWD
+    ,	MASTER_IMAGE
+    ,	START_DAY
+    ,	END_DAY
+    ,	ADD_FIELD1
+    ,	ADD_FIELD2
+    ,	ADD_FIELD3
+    ,	READ_CNT
+    ,	COMMENT_CNT
+    ,	ATTACH_CNT    
+    ,	IP
+    ,	STATUS
+    ,	REG_ID
+    ,	REG_NAME	
+    ,	REG_DATE
+    ) VALUES (
+    	#board_id#
+    ,	#cate_id#
+    ,	#parent_board_key#
+    ,	#order_group#
+    ,	#order_step#
+    ,	#order_level#
+    ,	#title#
+    ,	#summary#
+    ,	#video_type#
+    ,	#link_address#
+    ,	#content#
+    ,	#is_notice#
+    ,	#is_secret#
+    ,	#passwd#
+    ,	#master_image#
+    ,	#start_day#
+    ,	#end_day#
+    ,	#add_field1#
+    ,	#add_field2#
+    ,	#add_field3#
+    ,	0
+    ,	0
+    ,	0
+    ,	#ip#
+    ,	#status#
+    ,	#reg_id#
+    ,	#reg_name#	
+    ,	NOW()	
+    )
+    
+    	<selectKey resultClass="int" >
+		SELECT @@IDENTITY AS BOARD_KEY
+		</selectKey>
+    </insert>
+    
+    <insert id="insertBoardWriter">
+    /* BOARD.insertBoardWriter */
+    
+    INSERT INTO BOARD_WRITER
+    (
+    	BOARD_KEY
+    ,	WRITER
+    ,	COMPANY_NAME
+    ,	EMAIL
+    ,	PHONE	
+    ) VALUES (
+    	#board_key#
+    ,	#writer#
+    ,	#company_name#
+    ,	#email#
+    ,	#phone#
+    
+    ) ON DUPLICATE KEY UPDATE 
+    	BOARD_KEY = #board_key#
+    ,	WRITER = #writer#
+    ,	COMPANY_NAME = #company_name#
+    ,	EMAIL = #email#
+    ,	PHONE = #phone#
+    </insert>
+    
+    <update id="updateBoard">
+    /* BOARD.updateBoard */
+    
+    UPDATE BOARD SET
+    	CATE_ID = #cate_id#
+    ,	TITLE = #title#
+    ,	CONTENT = #content#
+    ,	SUMMARY = #summary#
+    ,	VIDEO_TYPE = #video_type#
+    ,	LINK_ADDRESS = #link_address#
+    <isNotEmpty property="is_notice">
+    ,	IS_NOTICE = #is_notice#
+    </isNotEmpty>
+    <isNotEmpty property="is_secret">
+    ,	IS_SECRET = #is_secret#
+    </isNotEmpty>
+    <isNotEmpty property="passwd">
+    ,	PASSWD = #passwd#
+    </isNotEmpty>
+    <isNotEmpty property="status">
+    ,	STATUS = #status#
+    </isNotEmpty>
+    ,	REG_NAME = #reg_name#
+    ,	MASTER_IMAGE = #master_image#
+    ,	START_DAY = #start_day#
+    ,	END_DAY = #end_day#
+    ,	ADD_FIELD1 = #add_field1#
+    ,	ADD_FIELD2 = #add_field2#
+    ,	ADD_FIELD3 = #add_field3#
+    ,	MOD_ID = #reg_id#
+    ,	MOD_DATE = NOW()
+    WHERE BOARD_KEY = #board_key#
+    AND BOARD_ID = #board_id#
+    </update>
+    
+    <update id="deleteBoard">
+    /*BOARD.deleteBoard */
+     
+    UPDATE BOARD SET 
+    	STATUS = 'D'
+    ,	DEL_ID = #reg_id#
+    ,	DEL_DATE = NOW()
+    WHERE BOARD_KEY = #board_key#
+    AND BOARD_ID = #board_id#    
+    </update>
+    
+    <update id="deleteChildBoard">
+    /*BOARD.deleteChildBoard */
+     
+    UPDATE BOARD SET 
+    	STATUS = 'D'
+    ,	DEL_ID = #reg_id#
+    ,	DEL_DATE = NOW()
+    WHERE PARENT_BOARD_KEY = #board_key#
+    AND BOARD_ID = #board_id#    
+    </update>
+    
+    <select id="getReplyChildPost" resultClass="int">
+		/* BOARD.getReplyChildPost */
+	
+	  	<![CDATA[
+		SELECT
+			ORDER_LEVEL 
+		FROM BOARD 
+		WHERE STATUS IN ('Y','N') 
+			AND ORDER_GROUP = #order_group# 
+			AND ORDER_STEP <= #order_step# 
+			AND ORDER_LEVEL > #order_level# 
+		ORDER BY ORDER_LEVEL 
+		LIMIT 0,1
+		]]>
+	</select>
+	
+	<select id="getReplyLevelChildPostNotFound" resultClass="int">
+		/* BOARD.getReplyLevelChildPostNotFound */
+	
+		<![CDATA[
+		SELECT			
+			ORDER_LEVEL 
+		FROM BOARD 
+		WHERE STATUS IN ('Y','N') 
+			AND ORDER_GROUP = #order_group# 
+			AND ORDER_STEP > #order_step# 
+			AND ORDER_LEVEL > #order_level# 
+		ORDER BY ORDER_LEVEL DESC
+		LIMIT 0,1 
+		]]>
+	</select>
+	
+	<update id="updateReplyLevel">
+		/* BOARD.updateReplyLevel */
+	
+		<![CDATA[
+		UPDATE BOARD SET 
+			ORDER_LEVEL = ORDER_LEVEL + 1 
+		WHERE ORDER_GROUP = #order_group# 
+			AND ORDER_LEVEL > #order_level#
+		]]>
+	</update>
+	
+    <select id="getBoardPrev" resultClass="board">		
+	/* BOARD.getBoardPrev */
+		
+		SELECT
+			<include refid="boardViewColumn" />
+		FROM BOARD
+		WHERE 1=1
+			<include refid="boardSearch" />			
+			<![CDATA[						
+			AND ORDER_GROUP < #order_group#
+			]]>			
+		ORDER BY ORDER_GROUP DESC, ORDER_LEVEL
+		LIMIT 0,1
+	</select>
+	
+	<select id="getBoardNext" resultClass="board">		
+	/* BOARD.getBoardNext */
+		
+		SELECT
+			<include refid="boardViewColumn" />
+		FROM BOARD
+		WHERE 1=1
+			<include refid="boardSearch" />			
+			<![CDATA[						
+			AND ORDER_GROUP > #order_group#
+			]]>
+		ORDER BY ORDER_GROUP, ORDER_LEVEL DESC
+		LIMIT 0,1
+	</select>
+	
+	<update id="updateReadCount">
+	/* BOARD.updateReadCount */
+	
+	UPDATE BOARD SET READ_CNT = READ_CNT+1
+	WHERE BOARD_KEY = #board_key#
+	</update>
+	
+	<update id="updateFileCount">
+	/* BOARD.updateFileCount */
+	
+	UPDATE BOARD SET 
+		ATTACH_CNT = (
+			SELECT COUNT(*) CNT FROM BOARD_FILE 
+			WHERE BOARD_KEY = #board_key# 
+			AND STATUS = 'Y')
+	WHERE BOARD_KEY = #board_key#
+	</update>
+	
+    <update id="updateCurrentPostGroupLvl">
+	/* BOARD.updateCurrentPostGroupLvl */
+	
+	UPDATE BOARD SET
+		PARENT_BOARD_KEY=#parent_board_key#
+	,	ORDER_GROUP=#order_group#
+	,	ORDER_STEP=#order_step#
+	,	ORDER_LEVEL=#order_level#
+	WHERE BOARD_KEY=#board_key#	
+	</update>
+	
+	<select id="getBoardView" resultClass="board">
+	/* BOARD.getBoardView */
+	
+	SELECT A.*, B.CATE_NAME FROM (
+		SELECT <include refid="boardViewColumn"/> FROM BOARD
+		WHERE 1=1
+		<include refid="boardSearch"/>
+		AND BOARD_KEY = #board_key#
+	) A
+	LEFT JOIN BOARD_CATEGORY B
+	ON A.CATE_ID = B.CATE_ID
+	</select>
+	
+	<select id="getBoardWriter" resultClass="board">
+	/* BOARD.getBoardWriter */
+	
+	SELECT BOARD_KEY, WRITER, EMAIL, PHONE FROM BOARD_WRITER
+	WHERE BOARD_KEY = #board_key#
+	</select>
+	
+    <select id="getBoardTotalCnt" resultClass="int">
+    /* BOARD.getBoardTotalCnt */
+    
+    SELECT COUNT(*) AS TOTAL_COUNT FROM BOARD FORCE INDEX(IDX_STATUS_BOARD_ID) 
+    WHERE 1=1
+    <include refid="boardSearch"/>
+    AND IS_NOTICE = 'N'
+    </select>
+    
+    <select id="getBoardList" resultClass="board">
+    /* BOARD.getBoardList */ 
+		
+	SELECT
+		A.*, B.CATE_NAME,
+		CASE
+			WHEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 3 DAY),'%Y-%m-%d') <![CDATA[	<=]]> REG_DATE THEN 'Y'
+		ELSE 'N' END AS IS_NEW_POST 
+	FROM 
+			(
+			SELECT 
+				<include refid="boardListColumn"/>
+			FROM BOARD FORCE INDEX(IDX_ORDER_GROUP)
+			WHERE 1=1	
+			<include refid="boardSearch"/>
+			AND IS_NOTICE = 'N'
+			<include refid="boardOrder" />	
+			<dynamic>
+				<isEqual prepend=" " property="order_type" compareValue="A">ASC</isEqual>
+				<isEqual prepend=" " property="order_type" compareValue="D">DESC</isEqual>
+			</dynamic>
+			, ORDER_LEVEL ASC
+			LIMIT #recordRowNum# , #pageSize#
+			) A
+	LEFT JOIN BOARD_CATEGORY B
+	ON A.CATE_ID = B.CATE_ID
+    </select>
+    
+    <select id="getNoticeBoardList" resultClass="board">
+    /* BOARD.getNoticeBoardList */
+    
+    SELECT A.*, B.CATE_NAME FROM (
+	    SELECT 
+	    	<include refid="boardListColumn"/>	 
+	    FROM BOARD
+	    WHERE 1=1
+	    AND IS_NOTICE = 'Y'
+	   	<include refid="boardSearch" />
+	   	ORDER BY ORDER_GROUP DESC
+	) A
+	LEFT JOIN BOARD_CATEGORY B
+	ON A.CATE_ID = B.CATE_ID
+    </select>
+    
+    <sql id="pastCommunitySearch">        
+	AND BOARD_ID IN (SELECT CODE FROM COMMON_CODE WHERE PARENT_CODE = 'PAST_FORUM_BOARD_GROUP' AND STATUS = 'Y')
+	AND REG_DATE BETWEEN #search_start_date# AND CONCAT(#search_end_date#,' 23:59:59')
+    </sql>
+    
+    <select id="getBoardPastCommunityTotalCount" resultClass="int">
+    /* BOARD.getBoardPastCommunityTotalCount */
+        
+    SELECT COUNT(*) AS TOTAL_COUNT FROM BOARD
+    WHERE 1=1	    
+   	<include refid="boardSearch" />
+   	<include refid="pastCommunitySearch" />
+    </select>
+    
+    <select id="getBoardPastCommunityList" resultClass="board">
+    /* BOARD.getBoardPastCommunityList */
+    
+    SELECT A.*, B.BOARD_NAME FROM (
+	    SELECT 
+	    	<include refid="boardListColumn"/>	 
+	    FROM BOARD
+	    WHERE 1=1	    
+	   	<include refid="boardSearch" />
+	   	<include refid="pastCommunitySearch" />	   	
+	   	ORDER BY ORDER_GROUP DESC
+	   	LIMIT #recordRowNum# , #pageSize#
+	) AS A
+	INNER JOIN BOARD_CONFIG AS B
+	ON A.BOARD_ID = B.BOARD_ID
+    </select>
+    
+    <select id="getBoardFaqContentList" resultClass="board">
+	/* BOARD.getBoardFaqContentList */
+	
+	SELECT BOARD_KEY, CONTENT FROM BOARD
+	WHERE BOARD_KEY IN
+	<iterate property="boardKeyList" open="(" close=")" conjunction=",">
+		#boardKeyList[]#
+	</iterate>
+	</select>
+	
+    <!-- 게시판 속성관리 -->
+    <insert id="insertBoardConfig">
+	/* BOARD.insertBoardConfig */
+	
+	INSERT INTO BOARD_CONFIG (
+		BOARD_NAME
+	,	BOARD_TYPE
+	,	NOTICE_USE_YN
+	,	COMMENT_USE_YN
+	,	REPLY_USE_YN
+	,	CATE_USE_YN
+	,	SECRET_USE_YN
+	,	EDITOR_USE_YN
+	,	PAGE_LIST_SIZE
+	,	PAGE_BLOCK_SIZE
+	,	WRITE_LIMIT
+	,	REPLY_LIMIT
+	,	FILE_COUNT_LIMIT
+	,	FILE_SIZE_LIMIT
+	,	FILE_EXT_LIMIT
+	,	STATUS
+	,	REG_DATE
+	,	MOD_DATE		
+	) VALUES (
+		#board_name#
+	,	#board_type#
+	,	#notice_use_yn#
+	,	#comment_use_yn#
+	,	#reply_use_yn#
+	,	#cate_use_yn#
+	,	#secret_use_yn#
+	,	#editor_use_yn#
+	,	#page_list_size#
+	,	#page_block_size#
+	,	#write_limit#
+	,	#reply_limit#
+	,	#file_count_limit#
+	,	#file_size_limit#
+	,	#file_ext_limit#
+	,	#status#
+	,	NOW()
+	,	NOW()
+	)
+	
+	<selectKey resultClass="int" >
+		SELECT @@IDENTITY AS BOARD_CONFIG_KEY
+	</selectKey>
+	</insert>
+	
+	<update id="updateBoardConfig">
+	/* BOARD.updateBoardConfig */
+	
+	UPDATE BOARD_CONFIG SET
+		BOARD_NAME = #board_name#
+	,	BOARD_TYPE = #board_type#
+	,	NOTICE_USE_YN = #notice_use_yn#
+	,	COMMENT_USE_YN = #comment_use_yn#
+	,	REPLY_USE_YN = #reply_use_yn#
+	,	CATE_USE_YN = #cate_use_yn#
+	,	SECRET_USE_YN = #secret_use_yn#
+	,	EDITOR_USE_YN = #editor_use_yn#
+	,	PAGE_LIST_SIZE = #page_list_size#
+	,	PAGE_BLOCK_SIZE = #page_block_size#
+	,	WRITE_LIMIT = #write_limit#
+	,	REPLY_LIMIT = #reply_limit#
+	,	FILE_COUNT_LIMIT = #file_count_limit#
+	,	FILE_SIZE_LIMIT = #file_size_limit#
+	,	FILE_EXT_LIMIT = #file_ext_limit#
+	,	STATUS = #status#
+	WHERE BOARD_ID = #board_id#
+	</update>
+	
+	<update id="deleteBoardConfig">
+	/* BOARD.deleteBoardConfig */
+	
+	UPDATE BOARD_CONFIG SET STATUS = 'D'
+	WHERE BOARD_ID = #board_id#
+	</update>
+	
+	<insert id="insertBoardCategory">
+	/* BOARD.insertBoardCategory */
+	
+	INSERT INTO BOARD_CATEGORY (
+		CATE_NAME
+	,	BOARD_ID
+	,	ORDER_LEVEL
+	,	STATUS
+	) VALUES (
+		#cate_name#
+	,	#board_id#
+	,	#order_level#
+	,	'Y'
+	)
+	</insert>
+	
+	<update id="updateBoardCategory">
+	/* BOARD.updateBoardCategory */
+	
+	UPDATE BOARD_CATEGORY SET
+		CATE_NAME = #cate_name#	
+	,	ORDER_LEVEL = #order_level#	
+	WHERE BOARD_ID = #board_id#
+	AND CATE_ID = #cate_id#
+	</update>
+	
+	<update id="deleteBoardCategory">
+	/* BOARD.deleteBoardCategory */
+	
+	UPDATE BOARD_CATEGORY SET STATUS = 'N'	
+	WHERE CATE_ID = #cate_id#
+	</update>
+	
+	<select id="getBoardConfigList" resultClass="boardConfig">
+	/* BOARD.getBoardConfigList */
+	
+	SELECT BOARD_ID, <include refid="boardConfigColumn"/> FROM BOARD_CONFIG
+	WHERE STATUS IN ('Y','N')
+	ORDER BY BOARD_NAME ASC 
+	</select>
+	
+	<select id="getBoardConfigInfo" resultClass="boardConfig">
+	/* BOARD.getBoardConfigInfo */
+	
+	SELECT A.*, B.TOP_CONTENT, B.BOTTOM_CONTENT FROM 
+		(
+		SELECT BOARD_ID, <include refid="boardConfigColumn"/> FROM BOARD_CONFIG
+		WHERE STATUS IN ('Y','N')
+		AND BOARD_ID = #board_id#	
+		) AS A
+	LEFT JOIN BOARD_TEMPLATE_INFO AS B
+	ON	 A.BOARD_ID = B.BOARD_ID
+	
+	</select>
+	
+	<select id="getBoardCategoryList" resultClass="boardCategory">
+	/* BOARD.getBoardCategoryList */
+	
+	SELECT
+		CATE_ID
+	,	CATE_NAME
+	,	BOARD_ID
+	,	ORDER_LEVEL
+	,	STATUS
+	FROM BOARD_CATEGORY
+	WHERE BOARD_ID = #board_id#
+	AND STATUS = 'Y'
+	ORDER BY ORDER_LEVEL ASC	
+	</select>
+	
+	<insert id="insertBoardTemplateInfo">
+	/* BOARD.insertBoardTemplateInfo */
+	
+	INSERT INTO BOARD_TEMPLATE_INFO
+	(
+		BOARD_ID
+	,	TOP_CONTENT
+	,	BOTTOM_CONTENT		
+	) VALUES (
+		#board_id#
+	,	#top_content#
+	,	#bottom_content#
+	) ON DUPLICATE KEY UPDATE
+		BOARD_ID = #board_id#
+	,	TOP_CONTENT = #top_content#
+	,	BOTTOM_CONTENT = #bottom_content#
+	</insert>
+	
+	<update id="updateBoardMasterImage">
+	/* BOARD.updateBoardMasterImage */
+	
+	UPDATE BOARD SET MASTER_IMAGE = #master_image# WHERE BOARD_KEY = #board_key#
+	</update>
+	
+	<select id="getBoardScheduleList" resultClass="board">
+	/* BOARD.getBoardScheduleList */
+	
+	SELECT BOARD_KEY, TITLE, START_DAY, END_DAY, STATUS FROM BOARD
+	WHERE START_DAY IS NOT NULL 
+	AND END_DAY IS NOT NULL
+	AND START_DAY <![CDATA[>=]]> #search_start_date# 
+	AND END_DAY <![CDATA[<=]]> #search_end_date#
+	AND ORDER_STEP = 0
+	AND BOARD_ID = #board_id#
+	<isEmpty prepend="AND" property="status">
+  		STATUS IN ('Y','N')
+    </isEmpty>
+    <isNotEmpty prepend="AND" property="status">    	        
+    	STATUS = 'Y'    
+    </isNotEmpty>
+    
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MENU">
+	
+    <typeAlias alias="menu" type="com.module.menu.dto.MenuDto"/>
+    
+    <sql id="menuColumn">
+    	MENU_CODE
+    ,	PARENT_MENU_CODE
+    ,	MENU_LOCATION_CODE
+    ,	MENU_KIND
+    ,	MENU_NAME
+    ,	ORDER_STEP
+    ,	ORDER_LEVEL
+    ,	LINK_ADDRESS
+    ,	IS_NEW_WINDOW    
+    ,	BOARD_ID 
+    ,	PAGE_SEQ   
+    ,	STATUS	
+    ,	MENU_AUTH_LEVEL
+    </sql>	
+	
+	<insert id="insertMenuInfo">
+	/* MENU.insertMenuInfo */
+	
+	INSERT INTO MENU_INFO(
+		MENU_CODE
+    ,	PARENT_MENU_CODE
+    ,	MENU_LOCATION_CODE
+    ,	MENU_NAME
+    ,	MENU_KIND
+    ,	ORDER_STEP
+    ,	ORDER_LEVEL
+    ,	LINK_ADDRESS
+    ,	IS_NEW_WINDOW    
+    ,	BOARD_ID    
+    ,	PAGE_SEQ
+    ,	STATUS
+    ,	MENU_AUTH_LEVEL
+	) VALUES (
+		#menu_code#
+    ,	#parent_menu_code#
+    ,	#menu_location_code#
+    ,	#menu_name#
+    ,	#menu_kind#
+    ,	#order_step#
+    ,	#order_level#
+    ,	#link_address#
+    ,	#is_new_window#    
+    <dynamic>
+    <isNotEmpty property="board_id">
+    ,	#board_id#
+    </isNotEmpty>
+    <isEmpty property="board_id">
+    ,	null
+    </isEmpty>    
+    <isNotEmpty property="page_seq">
+    ,	#page_seq#
+    </isNotEmpty>
+    <isEmpty property="page_seq">
+    ,	null
+    </isEmpty>
+    </dynamic>
+    ,	#status#
+    ,	#menu_auth_level#
+	)
+	</insert>
+	
+	<update id="updateMenuInfo">
+	/* MENU.updateMenuInfo */
+	
+	UPDATE MENU_INFO SET
+		MENU_NAME = #menu_name#    
+    ,	LINK_ADDRESS = #link_address#
+    ,	IS_NEW_WINDOW = #is_new_window#    
+    ,	MENU_KIND = #menu_kind#
+    ,	MENU_AUTH_LEVEL = #menu_auth_level#
+    <dynamic>
+    <isNotEmpty property="board_id">
+    ,	BOARD_ID = #board_id#
+    </isNotEmpty>
+    <isEmpty property="board_id">
+    ,	BOARD_ID = null
+    </isEmpty>
+    <isNotEmpty property="page_seq">
+    ,	PAGE_SEQ = #page_seq#
+    </isNotEmpty>
+    <isEmpty property="page_seq">
+    ,	PAGE_SEQ = null
+    </isEmpty>
+    </dynamic>    
+    ,	STATUS = #status#
+    WHERE MENU_CODE = #menu_code#
+	</update>
+	
+	<update id="deleteMenuInfo">
+	/* MENU.deleteMenuInfo */
+	
+	UPDATE MENU_INFO SET STATUS = 'D'
+    WHERE MENU_CODE = #menu_code#
+	</update>
+	
+	<select id="getMenuInfo" resultClass="menu">
+	/* MENU.getMenuInfo */
+	
+	SELECT <include refid="menuColumn"/> FROM MENU_INFO
+	WHERE STATUS IN ('Y','N')
+	AND MENU_CODE = #menu_code#
+	</select>
+	
+	<select id="getMenuList" resultClass="menu">
+	/* MENU.getMenuList */
+	
+	SELECT <include refid="menuColumn"/> FROM MENU_INFO
+	WHERE STATUS IN ('Y','N')
+	AND PARENT_MENU_CODE = #parent_menu_code#
+	ORDER BY ORDER_LEVEL
+	</select>
+	
+	<select id="getMenuNextOrderLevel" resultClass="int">
+	/* MENU.getMenuNextOrderLevel */
+	
+	SELECT COUNT(*) + 1 AS NEXT_ORDER_LEVEL FROM MENU_INFO
+	WHERE STATUS IN ('Y','N')
+	AND PARENT_MENU_CODE = #parent_menu_code#
+	</select>
+	
+	<select id="menuCodeDoubleCheck" resultClass="int">
+    /*	MENU.menuCodeDoubleCheck */
+    
+    SELECT COUNT(*) AS CNT FROM MENU_INFO
+    WHERE MENU_CODE = #menu_code#	    
+	</select>
+	
+	<update id="updateMenuSort">
+	/* MENU.updateMenuSort */
+	
+	UPDATE MENU_INFO SET ORDER_LEVEL = #order_level#
+	WHERE MENU_CODE = #menu_code#
+	</update>
+	
+	<select id="getMenuStepList" resultClass="menu">
+	/* MENU.getMenuStepList */
+	
+	SELECT <include refid="menuColumn"/> FROM MENU_INFO
+	WHERE STATUS = 'Y'	
+	ORDER BY ORDER_STEP ASC, ORDER_LEVEL ASC
+	</select>
+	
+	<select id="getMenuAuthCheck" resultClass="int">
+	/* MENU.getMenuAuthCheck */
+	
+	SELECT COUNT(*) AS CNT FROM MENU_INFO
+	WHERE STATUS = 'Y'
+	AND MENU_LOCATION_CODE LIKE CONCAT ('%', #req_url#,'%')
+	<dynamic>
+		<isNotEqual property="auth_level" compareValue="9">
+		AND MENU_AUTH_LEVEL LIKE CONCAT ('%', #auth_level#,'%')
+		</isNotEqual>
+	</dynamic>	  
+	</select>
+		
+</sqlMap>

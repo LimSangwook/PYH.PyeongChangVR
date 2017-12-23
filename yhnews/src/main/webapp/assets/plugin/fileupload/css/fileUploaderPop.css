@@ -1,0 +1,189 @@
+html, body {width:100%; height:100%;}
+@charset "utf-8";
+
+body {
+	margin:0;
+	padding:0px;
+	font-family:'돋움', dotum, AppleGithic, sans-serif;		
+	font-size:12px;	
+	color:#000000;
+	word-break:break-all;
+	scrollbar-face-color:#F2F2F2;
+	scrollbar-shadow-color:#DEDEDE;
+	scrollbar-highlight-color:#DEDEDE;
+	scrollbar-3dlight-color:#FFF;
+	scrollbar-darkshadow-color:#FFF;
+	scrollbar-track-color:#FFF;
+	scrollbar-arrow-color:#D2D2D2;	
+}
+
+font {line-height:1.3em}
+	
+a:link {text-decoration:none; color:#848484;}
+a:visited {text-decoration:none; color:#848484;}
+a:active {text-decoration:none; color:#333;}
+a:hover {text-decoration:none; color:#333;}
+
+ul, dl, ol , dt, dd {margin:0px; padding:0px;}
+
+ul, ol, li {list-style-type:none;}
+
+.px-form-input {
+
+}
+.px-buttons {
+	position:absolute;
+	margin:30px 0 0 0;
+	float: left;
+	width:50px;
+
+	
+}
+.px-buttons img{
+	margin-bottom: 8px;
+}
+.px-input-button {
+	overflow: hidden;
+}
+
+.px-input-button input {
+	position:absolute;
+	top: 0;
+	right: 0;	
+	-moz-opacity:0;
+	filter:alpha(opacity: 0);
+	opacity: 0;
+	cursor: pointer;
+	border-right: 100px solid #FFF;
+	border-bottom: 100px solid #FFF;
+	direction: ltr;
+	margin: 0;
+	padding: 0;
+	-o-transform: translate(250px, -50px) scale(1);
+	-moz-transform: translate(-300px, 0) scale(4);
+	
+}
+
+.ug-input-button input {
+	position:absolute;
+	top: 0;
+	right: 0;
+	-moz-opacity:0;
+	filter:alpha(opacity: 0);
+	opacity: 0;
+	cursor: pointer;
+	border-right: 100px solid #FFF;
+	border-bottom: 100px solid #FFF;
+	direction: ltr;
+	margin: 0;
+	padding: 0;
+	-o-transform: translate(250px, -50px) scale(1);
+	-moz-transform: translate(-300px, 0) scale(4);
+}
+
+.upload-data {
+	padding: 5px;
+	width: 340px;	
+	margin-top: 5px;
+	margin-bottom: 5px;
+	position: relative;
+}
+
+.upload-data.pending {
+	border: 2px solid #fbd850;
+}
+
+.upload-data.uploading {
+	border: 2px solid #EDBE05;
+}
+
+.upload-data.success {
+	border: 2px solid #CCCCCC;
+}
+
+.upload-data.error, .upload-data.cancel {
+	border: 1px solid #FF0000;
+}
+
+.px-widget ul.actions {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	margin: 0;
+    padding: 0;
+}
+
+.px-widget ul.actions li {
+	cursor: pointer;
+	float: left;
+	list-style: none outside none;
+	margin: 2px;
+	padding: 4px;
+	position: relative;
+}
+
+.upload-data .filename {
+	padding-right: 10px;
+	width: 120px;
+}
+
+.upload-data .status {
+	clear: both;
+}
+
+/* jQuery UI progressbar */
+.progress {
+	display: none;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.progressBar {
+	float: left;
+	width: 250px;
+	height: 22px;
+}
+.percentage {
+	float: left;
+	padding-left: 5px;
+	width: 50px;
+}
+.uploading .ui-progressbar-value {
+	background-image: url(ui-lightness/images/pbar-ani.gif);
+}
+
+.px-widget .ui-button {
+	height: 22px;
+}
+
+.fileUploadForm {border:2px solid #ccc; position:relative; width:350px;  padding:10px 0 10px 0; }
+.fileUploadForm p {text-align: ceter; padding-left: 14px;}
+.fileUploadForm p img{width:320px; height:220px;}
+.fileUploadForm .fileList {float:left; position:absolute; width:350px; border:2px solid #ccc; margin-top:20px; }
+.fileUploadForm .fileList ul { width:250px; height:100px; overflow:auto; font-weight:normal; border-right:1px solid #ccc;}
+.fileUploadForm .fileList ul li {line-height:17px; }
+.fileUploadForm .fileList ul li a {display:block; padding:3px;}
+
+
+
+div,p,h1,h2,h3,h4,dl,dt,dd,th,td,form {margin:0; padding:0;}
+/*  팝업 */
+#pop_wrap{position:relative;width:100%; background:url(../img/bg_header.png) top repeat-x;}
+#pop_header{padding:25px 0px 10px 0px; margin:0 13px 0 13px; border-bottom:2px solid #5a5b5c;}
+#pop_header h1{line-height:normal;font-size:20px; font-weight:600;}
+#pop_content{margin:0 13px 0 13px; padding:16px 0 0 0;}
+.pop_close{overflow:hidden;position:absolute;top:25px;right:13px;width:22px;height:22px;background:url(../img/btn_close.png) no-repeat;text-indent:-1000px}
+
+/* 파일첨부 */
+.file_form .info{margin-left:5px;}
+.file_form .info strong{font-size:13px;}
+.file_form .file_box{margin-top:15px; height:90px;}
+.file_form .file_box div{float:left;}
+.file_form .file_box div.file{ margin-left:5px;}
+.file_form .file_box .image{border:1px solid #e1e4e6;}
+.file_form .file_box .image img {width:88px; height:88px;}
+.file_form .file_box .file{width:350px; height:88px;border:1px solid #e1e4e6; overflow:auto;}
+.file_form .file_box .file ul{padding:2px;}
+.file_form .file_box .file ul li{padding:3px;}
+.file_form .file_box .btn{margin-left:4px;}
+.file_form .file_box .btn a{display:block; padding-bottom:2px;}
+.file_form .btn2 {clear:both; margin-top:15px; text-align:center;}

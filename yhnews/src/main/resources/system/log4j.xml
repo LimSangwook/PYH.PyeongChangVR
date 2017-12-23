@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	
+	<!-- console  -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">	
+		<param name="Target" value="System.out" />	
+	   	<layout class="org.apache.log4j.PatternLayout">	
+	    	<param name="ConversionPattern" value="[%d{HH:mm:ss}] %m%n" />	
+		</layout>	
+	</appender>
+ 
+	<!-- DatePattern 패턴에 따른 로그 파일 생성 -->
+	<!-- [ DatePattern ] SimpleDateFormat 을 따름.
+		'.'yyyy-MM         		매달 첫번째날에 로그파일을 변경합니다
+		'.'yyyy-ww         		매주의 시작시 로그파일을 변경합니다.
+		'.'yyyy-MM-dd        	매일 자정에 로그파일을 변경합니다.
+		'.'yyyy-MM-dd-a        	자정과 정오에 로그파일을 변경합니다.
+		'.'yyyy-MM-dd-HH       매 시간의 시작마다 로그파일을 변경합니다.
+		'.'yyyy-MM-dd-HH-mm  매분마다 로그파일을 변경합니다.
+		-->
+	<appender name="dailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
+		<!-- ref.) attr : FileAppender + DatePattern -->
+		<param name="File" value="/WebProjectsLogs/ywmuseum.log" />
+		<param name="Append" value="true" />
+		<param name="encoding" value="UTF-8" />		
+		<param name="DatePattern" value="'.'yyyy-MM-dd-a" />
+		<layout class="org.apache.log4j.PatternLayout">
+		<param name="ConversionPattern" value="%d %5p [%c] %m%n" />
+		</layout>
+	</appender>
+	
+	<logger name="org.springframework">
+		<level value="INFO"/>
+	</logger>
+	
+	<logger name="com.ibatis">
+		<level value="INFO"/>
+	</logger>
+	
+	<logger name="java.sql">
+		<level value="DEBUG"/>
+	</logger>
+	
+	<logger name="org.apache.log4j">
+		<level value="INFO"/>
+	</logger>
+	
+	<root>
+	    <!--  로그 찍는 레벨 -->
+		<level value="DEBUG" />
+		<!--  콘솔어펜더 이름 -->
+		<appender-ref ref="console" />
+		<!--  데일리어펜더 이름 -->
+		<appender-ref ref="dailyRollingFile" />
+	</root>
+	
+</log4j:configuration>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util"	
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/util	http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	">
+	<mvc:annotation-driven />
+		
+	<context:component-scan base-package="com.module,com.common.dao" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />		
+	</context:component-scan>
+	
+	<util:properties id="config" location="classpath:/system/config.properties"/>
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">		
+    	<property name="maxInMemorySize" value="5242880"/>
+    	<!-- <property name="uploadTempDir" ref="uploadDirResource" /> -->
+    	<property name="defaultEncoding" value="UTF-8"/>    	
+    	<property name="maxUploadSize" value="-1"/>
+    	<!-- the maximum file size in bytes = ( 무제한:-1, 100MB:104857600, 50MB:5242880 )-->
+	</bean>
+	
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver" />
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>			
+				<value>classpath:message/message</value>	
+				<value>classpath:message/message_en_US</value>
+				<value>org/springframework/security/messages</value>
+			</list>
+		</property>
+		<property name="defaultEncoding" value="UTF-8"/>
+		<property name="cacheSeconds" value="180"/>
+	</bean>
+	 	
+	<bean id="messageSourceAccessor"
+		class="org.springframework.context.support.MessageSourceAccessor">
+		<constructor-arg>
+			<ref local="messageSource" />
+		</constructor-arg>
+	</bean>	
+	
+	<bean id="loggingAndExceptionAspect" class="com.common.aop.DevnectXMLAdvice" />
+	
+	<!--DAO package 에 적용 할 aspect 를 정의한다.-->	     
+    <aop:config proxy-target-class="false">
+		<aop:pointcut id="modulePackage" expression="execution(public * com.module..*Impl.*(..)) "/>
+		<aop:aspect ref="loggingAndExceptionAspect">						
+			<aop:after-throwing method="afterThrowingExceptionExecuteMethod" throwing="exception" pointcut-ref="modulePackage" />			
+			<aop:around method="aroundExecuteMethod" pointcut-ref="modulePackage" />			
+		</aop:aspect>		 		
+	</aop:config>
+	
+</beans>

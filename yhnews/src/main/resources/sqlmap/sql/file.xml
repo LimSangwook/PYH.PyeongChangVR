@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FILE">
+	
+    <typeAlias alias="file" type="com.module.file.dto.FileDto"/>
+    
+    <sql id="fileColumn">
+    	FILE_KEY
+    ,	BOARD_KEY
+    ,	REAL_FILE_NAME
+    ,	SAVE_FILE_NAME
+    ,	FILE_PATH
+    ,	FILE_EXT
+    ,	FILE_SIZE
+    ,	FILE_DOWN_CNT
+    ,	IMAGE_WIDTH_SIZE
+    ,	IMAGE_HEIGHT_SIZE	
+    </sql>
+
+	<insert id="insertFile">
+	/* FILE.insertFile */
+	
+	INSERT INTO BOARD_FILE
+	(
+		BOARD_KEY		
+    ,	REAL_FILE_NAME
+    ,	SAVE_FILE_NAME
+    ,	FILE_PATH
+    ,	FILE_EXT
+    ,	FILE_SIZE
+    ,	FILE_DOWN_CNT
+    ,	ORDER_LEVEL
+    ,	IMAGE_WIDTH_SIZE
+    ,	IMAGE_HEIGHT_SIZE
+    ,	STATUS
+    ,	REG_DATE
+	) VALUES (
+		#board_key#		
+    ,	#real_file_name#
+    ,	#save_file_name#
+    ,	#file_path#
+    ,	#file_ext#
+    ,	#file_size#
+    ,	#file_down_cnt#
+    ,	#order_level#
+    ,	#image_width_size#
+    ,	#image_height_size#
+    ,	'Y'
+    ,	now()
+	)
+	</insert>
+	
+	<select id="getFileList" resultClass="file">
+	/* FILE.getFileList */
+	
+	SELECT <include refid="fileColumn"/> FROM BOARD_FILE
+	WHERE BOARD_KEY = #board_key#
+	AND STATUS = 'Y'
+	<!-- ORDER BY ORDER_LEVEL -->
+	</select>
+	
+	<select id="getFileInfo" resultClass="file">
+	/* FILE.getFileInfo */
+	
+	SELECT <include refid="fileColumn"/> FROM BOARD_FILE
+	WHERE FILE_KEY = #file_key#
+	AND SAVE_FILE_NAME = #save_file_name#
+	AND STATUS = 'Y'	
+	</select>
+	
+	<update id="deleteFileInfo">
+	/* FILE.deleteFileInfo */
+	
+	UPDATE BOARD_FILE SET STATUS = 'N'
+	WHERE FILE_KEY IN
+	<iterate property="remove" open="(" close=")" conjunction=",">
+		#remove[]#
+	</iterate>		
+	</update>
+	
+	<update id="updateFileOrderLevel">
+	/* FILE.updateFileOrderLevel */
+	
+	UPDATE BOARD_FILE SET ORDER_LEVEL = #order_level#
+	WHERE FILE_KEY = #file_key#
+	AND BOARD_KEY = #board_key#
+	</update>
+	
+	<update id="updateFileDownCount">
+	/* FILE.updateFileDownCount */
+	
+	UPDATE BOARD_FILE SET FILE_DOWN_CNT = FILE_DOWN_CNT+1
+	WHERE FILE_KEY = #file_key#
+	AND BOARD_KEY = #board_key#
+	</update>
+	
+	<!-- 상품 이미지 파일 -->
+	<insert id="insertGoodsPhotoFile">
+	/* FILE.insertGoodsPhotoFile */
+	
+	INSERT INTO GOODS_PHOTO
+	(
+		GOODS_CODE
+	,	LANG_CODE
+	,	ORDER_LEVEL
+	,	REAL_FILE_NAME
+	,	SAVE_FILE_NAME
+	,	FILE_PATH
+	,	FILE_EXT
+	,	FILE_SIZE
+	,	IMAGE_WIDTH_SIZE
+	,	IMAGE_HEIGHT_SIZE
+	,	STATUS
+	,	REG_DATE
+	) VALUES (
+		#goods_code#
+	,	#lang_code#
+	,	#order_level#
+	,	#real_file_name#
+	,	#save_file_name#
+	,	#file_path#
+	,	#file_ext#
+	,	#file_size#
+	,	#image_width_size#
+	,	#image_height_size#
+	,	'Y'
+	,	NOW()
+	)   
+	</insert>
+	
+	<update id="deleteGoodsPhotoFile">
+	/* FILE.deleteGoodsPhotoFile */
+	
+	UPDATE GOODS_PHOTO SET
+		STATUS = 'N'
+	WHERE FILE_KEY IN
+		<iterate property="remove" open="(" close=")" conjunction=",">
+			#remove[]#
+		</iterate>	    
+	</update>
+	
+	<select id="getGoodsPhotoFileList" resultClass="file">
+	/* FILE.getGoodsPhotoFileList */
+	
+	SELECT 
+		FILE_KEY
+	,	GOODS_CODE
+	,	LANG_CODE
+	,	ORDER_LEVEL
+	,	REAL_FILE_NAME
+	,	SAVE_FILE_NAME
+	,	FILE_PATH
+	,	FILE_EXT
+	,	FILE_SIZE
+	,	IMAGE_WIDTH_SIZE
+	,	IMAGE_HEIGHT_SIZE
+	FROM GOODS_PHOTO
+	WHERE GOODS_CODE = #goods_code#
+	AND STATUS = 'Y'
+	<isNotEmpty prepend="AND" property="lang_code">
+	    LANG_CODE = #lang_code#
+	</isNotEmpty>
+	ORDER BY FILE_KEY ASC
+	</select>
+	
+	<update id="updateGoodsPhotoOrderLevel">
+	/* FILE.updateGoodsPhotoOrderLevel */
+	
+	UPDATE GOODS_PHOTO SET ORDER_LEVEL = #order_level#
+	WHERE FILE_KEY = #file_key#
+	AND GOODS_CODE = #goods_code#
+	</update>
+</sqlMap>

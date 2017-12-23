@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="COMPANY">
+	
+    <typeAlias alias="company" type="com.module.parti.dto.PartiCompanyDto"/>
+    
+	<sql id="column">
+	    COMPANY_KEY
+	,	CEO_NAME
+	,	COMPANY_NAME
+	,	MASTER_PHONE
+	,	MASTER_EMAIL
+	,	FAX
+	,	BUSINESS_KIND_NAME
+	,	HOME_PAGE
+	,	CONTACT_NAME
+	,	EMAIL
+	,	PHONE	
+	,	ZIP_CODE
+	,	ADDRESS1
+	,	ADDRESS2
+	,	MASTER_IMAGE
+	,	STATUS
+	,	REG_DATE
+	</sql>
+    
+	<sql id="search">
+	    <dynamic>
+            <isEqual prepend="AND" property="search_type" compareValue="1">
+                STATUS IN ('Y','N')                
+            </isEqual>
+            <isEqual prepend="AND" property="search_type" compareValue="2">
+                STATUS = 'Y'
+            </isEqual>
+             
+            <isNotEmpty prepend="AND" property="search_keyword">
+				<isEqual property="search_column" compareValue="1">
+					COMPANY_NAME LIKE #db_search_keyword#
+				</isEqual>
+				<isEqual property="search_column" compareValue="2">
+					CEO_NAME LIKE #db_search_keyword#
+				</isEqual>
+				<isEqual property="search_column" compareValue="3">
+					MASTER_PHONE LIKE #db_search_keyword#
+				</isEqual>
+			</isNotEmpty>			
+        </dynamic>	    
+	</sql>
+	
+    <insert id="insertCompanyInfo">
+    /* COMPANY.insertCompanyInfo */
+    
+    INSERT INTO PARTI_COMPANY
+    (
+    	CEO_NAME
+    ,	COMPANY_NAME
+	,	MASTER_PHONE
+	,	MASTER_EMAIL
+	,	FAX
+	,	BUSINESS_KIND_NAME
+	,	HOME_PAGE
+	,	CONTACT_NAME
+	,	EMAIL
+	,	PHONE	
+	,	ZIP_CODE
+	,	ADDRESS1
+	,	ADDRESS2
+	,	MASTER_IMAGE
+	,	CONTENT
+	,	STATUS
+	,	REG_DATE
+	,	MOD_DATE
+    ) VALUES (
+    	#ceo_name#
+    ,	#company_name#	
+	,	#master_phone#
+	,	#master_email#
+	,	#fax#
+	,	#business_kind_name#
+	,	#home_page#
+	,	#contact_name#
+	,	#email#
+	,	#phone#	
+	,	#zip_code#
+	,	#address1#
+	,	#address2#
+	,	#master_image#
+	,	#content#
+	,	#status#
+	,	NOW()
+	,	NOW()
+    )   
+    </insert>
+    
+    <update id="updateCompanyInfo">
+    /* COMPANY.updateCompanyInfo */
+    
+    UPDATE PARTI_COMPANY SET
+    	CEO_NAME = #ceo_name#
+    ,	COMPANY_NAME = #company_name#
+	,	MASTER_PHONE = #master_phone#
+	,	MASTER_EMAIL = #master_email#
+	,	FAX = #fax#
+	,	BUSINESS_KIND_NAME = #business_kind_name#
+	,	HOME_PAGE = #home_page#
+	,	CONTACT_NAME = #contact_name#
+	,	EMAIL = #email#
+	,	PHONE = #phone#	
+	,	ZIP_CODE = #zip_code#
+	,	ADDRESS1 = #address1#
+	,	ADDRESS2 = #address2#
+	,	MASTER_IMAGE = #master_image#
+	,	CONTENT = #content#
+	,	STATUS = #status#
+	,	MOD_DATE = NOW()	
+	WHERE COMPANY_KEY = #company_key#
+    </update>
+    
+    <update id="deleteCompanyInfo">
+    /* COMPANY.deleteCompanyInfo */    
+    
+    UPDATE PARTI_COMPANY SET
+		STATUS = 'D'
+	,	MOD_DATE = NOW()	
+	WHERE COMPANY_KEY = #company_key#    
+    </update>
+    
+    <select id="getCompanyInfo" resultClass="company">
+    /* COMPANY.getCompanyInfo */
+    
+    SELECT <include refid="column"/>, CONTENT FROM PARTI_COMPANY
+    WHERE COMPANY_KEY = #company_key#        
+    </select>
+    
+    <select id="getCompanyTotalCount" resultClass="int">
+	/* COMPANY.getCompanyTotalCount */        
+    
+    SELECT COUNT(*) AS TOTAL_COUNT FROM PARTI_COMPANY
+    WHERE 1=1
+    <include refid="search"/>    
+    </select>
+    
+    <select id="getCompanyList" resultClass="company">
+    /* COMPANY.getCompanyList */
+    
+    SELECT <include refid="column"/> FROM PARTI_COMPANY
+    WHERE 1=1
+    <include refid="search"/>
+    ORDER BY COMPANY_NAME
+    LIMIT #recordRowNum# , #pageSize#	
+    </select>
+    
+</sqlMap>

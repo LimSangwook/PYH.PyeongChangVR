@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SEO">
+	
+    <typeAlias alias="seo" type="com.module.seo.dto.SeoDto"/>
+    
+    <sql id="column">
+    	SEO_KEY
+    ,	HOMEPAGE
+    ,	TITLE
+    ,	CONTENT
+    ,	KEYWORD
+    ,	EMAIL
+   	,	COMPANY_NAME
+   	,	TEL
+   	,	FAX
+   	,	ADDRESS
+   	,	OPEN_DAY		
+    </sql>
+
+	<select id="getSeoInfo" resultClass="seo">
+	/* SEO.getSeoInfo */
+	    
+	SELECT <include refid="column"/> FROM SEO_INFO
+	LIMIT 0,1	    
+	</select>
+	
+	<insert id="insertSeoInfo">
+	/* SEO.insertSeoInfo */
+	    
+	INSERT INTO SEO_INFO
+	(
+		HOMEPAGE
+	,	TITLE
+	,	CONTENT
+	,	KEYWORD
+	,	EMAIL
+	,	COMPANY_NAME
+	,	TEL
+	,	FAX
+	,	ADDRESS
+	,	OPEN_DAY	
+	) VALUES (
+		#homepage#
+	,	#title#
+	,	#content#
+	,	#keyword#
+	,	#email#
+	,	#company_name#
+	,	#tel#
+	,	#fax#
+	,	#address#
+	,	#open_day#
+	)    
+		<selectKey resultClass="int" >
+		SELECT @@IDENTITY AS SEO_KEY
+		</selectKey>
+	</insert>
+	
+	<update id="updateSeoInfo">
+	/* SEO.updateSeoInfo */
+	
+	UPDATE SEO_INFO SET
+		HOMEPAGE = #homepage#
+	,	TITLE = #title#
+	,	CONTENT = #content#
+	,	KEYWORD = #keyword#
+	,	EMAIL = #email#
+	,	COMPANY_NAME = #company_name#
+	,	TEL = #tel#
+	,	FAX = #fax#
+	,	ADDRESS = #address#
+	,	OPEN_DAY = #open_day#
+	WHERE SEO_KEY = #seo_key#    
+	</update>
+</sqlMap>

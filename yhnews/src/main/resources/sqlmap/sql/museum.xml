@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MUSEUM">
+	
+    <typeAlias alias="museum" type="com.module.museum.dto.MuseumDto"/>
+    <typeAlias alias="museumMenu" type="com.module.museum.dto.MuseumMenuDto"/>
+    <typeAlias alias="museumMenuCont" type="com.module.museum.dto.MuseumMenuContDto"/>
+    <typeAlias alias="museumAuthMap" type="com.module.museum.dto.MuseumAuthMapDto"/>
+    
+    <sql id="museumColumn">
+    	MUSEUM_NO
+    ,	KIND
+    ,	MUSEUM_NAME
+    ,	CONT_EXPL
+    ,	CLOSED_DAY
+    ,	PHONE
+    ,	FAX
+    ,	ZIP_CODE
+    ,	ADDRESS1
+    ,	ADDRESS2
+    ,	MAIN_IMAGE
+    ,	SUB_IMAGE
+    ,	LINK_DOMAIN
+    ,	STATUS
+    ,	REG_DATE	    
+    </sql>
+    
+    <insert id="insertMuseumInfo">
+    /* MUSEUM.insertMuseumInfo */
+    
+    INSERT INTO MUSEUM_INFO
+    (
+    	KIND
+    ,	MUSEUM_NAME
+    ,	CONT_EXPL
+    ,	CLOSED_DAY
+    ,	PHONE
+    ,	FAX
+    ,	ZIP_CODE
+    ,	ADDRESS1
+    ,	ADDRESS2
+    ,	MAIN_IMAGE
+    ,	SUB_IMAGE
+    ,	LINK_DOMAIN
+    ,	STATUS
+    ,	REG_DATE
+    ,	MOD_DATE	
+    ) VALUES (
+    	#kind#
+    ,	#museum_name#
+    ,	#cont_expl#
+    ,	#closed_day#
+    ,	#phone#
+    ,	#fax#
+    ,	#zip_code#
+    ,	#address1#
+    ,	#address2#
+    ,	#main_image#
+    ,	#sub_image#
+    ,	#link_domain#
+    ,	#status#
+    ,	NOW()
+    ,	NOW()
+    )
+    
+   	<selectKey resultClass="int" >
+	SELECT @@IDENTITY AS MUSEUM_KEY
+	</selectKey>
+    </insert>
+	
+    <update id="updateMuseumInfo">
+    /* MUSEUM.updateMuseumInfo */
+    
+    UPDATE MUSEUM_INFO SET
+    	MUSEUM_NO = #museum_no#
+    ,	KIND = #kind#
+    ,	MUSEUM_NAME = #museum_name#
+    ,	CONT_EXPL = #cont_expl#
+    ,	CLOSED_DAY = #closed_day#
+    ,	PHONE = #phone#
+    ,	FAX = #fax#
+    ,	ZIP_CODE = #zip_code#
+    ,	ADDRESS1 = #address1#
+    ,	ADDRESS2 = #address2#
+    ,	MAIN_IMAGE = #main_image#
+    ,	SUB_IMAGE = #sub_image#
+    ,	LINK_DOMAIN = #link_domain#
+    ,	STATUS = #status#
+    ,	MOD_DATE = NOW()    
+    WHERE MUSEUM_NO = #museum_no#    
+    </update>
+    
+    <select id="getMuseumInfo" resultClass="museum">
+    /* MUSEUM.getMuseumInfo */
+    
+    SELECT <include refid="museumColumn"/> FROM MUSEUM_INFO
+    WHERE MUSEUM_NO = #museum_no# 
+    AND STATUS IN ('Y','N')   
+    </select>
+    
+    <select id="getMuseumActiveInfo" resultClass="museum">
+    /* MUSEUM.getMuseumActiveInfo */
+    
+    SELECT <include refid="museumColumn"/> FROM MUSEUM_INFO
+    WHERE MUSEUM_NO = #museum_no#
+    AND STATUS = 'Y'   
+    </select>
+    
+	<select id="getMuseumMenuList" resultClass="museumMenu">
+	/* MUSEUM.getMuseumMenuList */
+	
+	SELECT MENU_CODE, MENU_NAME, KIND FROM MUSEUM_MENU_INFO
+	ORDER BY ORDER_LEVEL
+	</select>
+	
+	<insert id="insertMuseumMenuContent">
+	/* MUSEUM.insertMuseumMenuContent */    
+		
+	INSERT INTO MUSEUM_MENU_CONTENT
+	(
+		MUSEUM_NO
+	,	MENU_CODE
+	,	CONTENT
+	,	BOARD_ID	
+	) VALUES (
+		#museum_no#
+	,	#menu_code#
+	,	#content#
+	,	#board_id#
+	)
+	</insert>
+	
+	<update id="updateMuseumMenuContent">
+	/* MUSEUM.insertMuseumMenuContent */
+	
+	UPDATE MUSEUM_MENU_CONTENT SET CONTENT = #content#
+	WHERE MUSEUM_NO = #museum_no#
+	AND MENU_CODE = #menu_code#
+	</update>
+	
+	<select id="getMuseumMenuContInfo" resultClass="museumMenuCont">
+	/* MUSEUM.getMuseumMenuContInfo */
+	
+	SELECT A.*, B.MENU_NAME FROM 
+		(
+		SELECT MUSEUM_NO, MENU_CODE, BOARD_ID, CONTENT FROM MUSEUM_MENU_CONTENT
+		WHERE MUSEUM_NO = #museum_no#
+		AND MENU_CODE = #menu_code#	
+		) AS A, MUSEUM_MENU_INFO AS B
+	WHERE A.MENU_CODE = B.MENU_CODE		    
+	</select>
+	
+	<select id="getMuseumList" resultClass="museum">
+	/* MUSEUM.getMuseumList */
+	
+	SELECT <include refid="museumColumn"/> FROM MUSEUM_INFO
+	WHERE 1=1
+		<dynamic>
+		    <isEqual prepend="AND" property="status" compareValue="Y">
+				STATUS = 'Y'
+		    </isEqual>
+		    <isEmpty prepend="AND" property="status">
+		        STATUS IN ('Y','N')
+		    </isEmpty>
+		</dynamic>	
+	ORDER BY MUSEUM_NAME
+	</select>
+	
+	<select id="getMuseumMenuContList" resultClass="museumMenuCont">
+	/* MUSEUM.getMuseumMenuContList */
+	
+	SELECT A.*, B.MENU_NAME FROM 
+		(
+			SELECT 
+			MUSEUM_NO
+		, 	MENU_CODE
+		, 	BOARD_ID
+		FROM MUSEUM_MENU_CONTENT
+		WHERE 1=1
+		<dynamic>
+		    <isNotEmpty prepend="AND" property="museum_no">
+		        MUSEUM_NO = #museum_no#
+		    </isNotEmpty>	    
+		</dynamic>	
+		) AS A, MUSEUM_MENU_INFO AS B
+	WHERE A.MENU_CODE = B.MENU_CODE
+	ORDER BY B.ORDER_LEVEL 	
+	
+	</select>
+	
+	<insert id="insertMuseumAuthMap">
+	/* MUSEUM.insertMuseumAuthMap */
+	
+	INSERT INTO MUSEUM_AUTH_MAP
+	(
+		USER_ID
+	,	MUSEUM_NO
+	,	AUTH_STATUS
+	,	REG_DATE
+	,	MOD_DATE	
+	) VALUES (
+		#user_id#
+	,	#museum_no#
+	,	#auth_status#
+	,	NOW()
+	,	NOW()
+	) ON DUPLICATE KEY UPDATE
+		USER_ID = #user_id#
+	,	MUSEUM_NO = #museum_no#
+	,	AUTH_STATUS = #auth_status#
+	,	MOD_DATE = NOW()	   
+	</insert>
+	
+	<select id="getMuseumAuthMapList" resultClass="museumAuthMap">
+	/* MUSEUM.getMuseumAuthMapList */
+	
+	SELECT 
+		A.USER_ID
+	,	A.MUSEUM_NO
+	, 	A.AUTH_STATUS
+	,	B.MUSEUM_NAME 
+	FROM MUSEUM_AUTH_MAP AS A, MUSEUM_INFO AS B
+	WHERE USER_ID = #user_id#
+	AND A.MUSEUM_NO = B.MUSEUM_NO
+	AND AUTH_STATUS = 'Y'
+	ORDER BY MUSEUM_NAME
+	</select>
+	
+	<select id="getMuseumDomainList" resultClass="museum">
+	SELECT MUSEUM_NO, LINK_DOMAIN FROM MUSEUM_INFO
+    WHERE STATUS = 'Y'
+	</select>
+	
+</sqlMap>

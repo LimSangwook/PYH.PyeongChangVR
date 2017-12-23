@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FORUM">
+	
+    <typeAlias alias="forum" type="com.module.forum.dto.ForumDto"/>
+    <typeAlias alias="forumCont" type="com.module.forum.dto.ForumContDto"/>
+    <typeAlias alias="speaker" type="com.module.forum.dto.SpeakerDto"/>
+    <typeAlias alias="speakerKind" type="com.module.forum.dto.SpeakerKindDto"/>
+	
+    <sql id="forumColumn">
+    	EVENT_NAME
+    ,	TURN_NUM
+    ,	EVENT_YEAR
+    ,	PERIOD
+    ,   LOCATION
+    ,	HOST_NAME
+    ,	ORGANIZE_NAME
+    ,	MASTER_IMAGE
+    ,	ORDER_LEVEL
+    ,	STATUS
+    ,	BOARD_SEARCH_START_DAY
+    ,	BOARD_SEARCH_END_DAY
+    ,	REG_DATE
+    </sql>
+    
+    <sql id="speakerColumn">
+        SPEAKER_KEY
+    ,	FORUM_KEY
+    ,	KIND
+    ,	SPEAKER_KIND_DETAIL
+    ,	NAME
+    ,	COUNTRY
+    ,	BELONG
+    ,	SUBJECT
+    ,	CONTENT
+    ,	PROFILE_PHOTO
+    ,	ORDER_LEVEL
+    ,	STATUS    	    
+    </sql>
+    
+    <sql id="speakerSearch">        
+        <dynamic>
+            <isEqual prepend="AND" property="search_type" compareValue="1">
+                STATUS IN ('Y','N')                
+            </isEqual>
+            <isEqual prepend="AND" property="search_type" compareValue="2">
+                STATUS = 'Y'
+            </isEqual>
+            <isNotEmpty prepend="AND" property="kind">
+                KIND = #kind#                
+            </isNotEmpty>    
+             
+            <isNotEmpty prepend="AND" property="search_keyword">
+				<isEqual property="search_column" compareValue="1">
+					NAME LIKE #db_search_keyword#
+				</isEqual>
+			</isNotEmpty>			
+        </dynamic>        
+    </sql>
+    
+    <insert id="insertForumInfo">
+    /* FORUM.insertForumInfo */
+    
+    INSERT INTO FORUM_INFO
+    (    	
+    	EVENT_NAME
+    ,	TURN_NUM
+    ,	EVENT_YEAR
+    ,	PERIOD
+    ,   LOCATION
+    ,	HOST_NAME
+    ,	ORGANIZE_NAME
+    ,	MASTER_IMAGE
+    ,	ORDER_LEVEL
+    ,	STATUS
+    ,	BOARD_SEARCH_START_DAY
+    ,	BOARD_SEARCH_END_DAY
+    ,	REG_DATE
+    ,	MOD_DATE
+    ) VALUES (
+    	#event_name#
+    ,	#turn_num#
+    ,	#event_year#
+    ,	#period#
+    ,   #location#
+    ,	#host_name#
+    ,	#organize_name#
+    ,	#master_image#
+    ,	#order_level#
+    ,	#status#
+    ,	#board_search_start_day#
+    ,	#board_search_end_day#
+    ,	NOW()
+    ,	NOW()
+    )   
+    	<selectKey resultClass="int" >
+		SELECT @@IDENTITY AS FORUM_KEY
+		</selectKey>
+	
+    </insert>
+    
+    <update id="updateForumInfo">
+    /* FORUM.updateForumInfo */
+    
+    UPDATE FORUM_INFO SET
+    	MOD_DATE = NOW()
+    ,	EVENT_NAME = #event_name#
+    ,	TURN_NUM = #turn_num#
+    ,	EVENT_YEAR = #event_year#
+    ,	PERIOD = #period#
+    ,   LOCATION = #location#
+    ,	HOST_NAME = #host_name#
+    ,	ORGANIZE_NAME = #organize_name#
+    ,	MASTER_IMAGE = #master_image#
+    ,	ORDER_LEVEL = #order_level#
+    ,	STATUS = #status#
+    ,	BOARD_SEARCH_START_DAY = #board_search_start_day#
+    ,	BOARD_SEARCH_END_DAY = #board_search_end_day#		    
+    WHERE FORUM_KEY = #forum_key#    
+    </update>
+    
+    <insert id="insertForumCont">
+    /* FORUM.insertForumCont */
+    
+    INSERT INTO FORUM_CONTENT
+    (
+    	FORUM_KEY
+    ,	CONTENT1
+    ,	CONTENT2
+    ,	CONTENT3
+    ,	CONTENT4	
+    ) VALUES (
+    	#forum_key#
+    ,	#content1#
+    ,	#content2#
+    ,	#content3#
+    ,	#content4#
+    ) ON DUPLICATE KEY UPDATE
+    	FORUM_KEY = #forum_key#
+    ,	CONTENT1 = #content1#
+    ,	CONTENT2 = #content2#
+    ,	CONTENT3 = #content3#
+    ,	CONTENT4 = #content4#
+    </insert>
+    
+    <select id="getForumInfo" resultClass="forum">
+    /* FORUM.getForumInfo */    
+    
+    SELECT 
+    	<include refid="forumColumn"/>
+    ,	A.FORUM_KEY
+    ,	B.CONTENT1
+    ,	B.CONTENT2
+    ,	B.CONTENT3
+    ,	B.CONTENT4	 
+    FROM FORUM_INFO AS A, FORUM_CONTENT AS B
+    WHERE A.FORUM_KEY = B.FORUM_KEY
+    AND A.FORUM_KEY = #forum_key#
+    </select>
+    
+    <select id="getForumActiveInfo" resultClass="forum">
+    /* FORUM.getForumActiveInfo */    
+    
+    SELECT 
+    	<include refid="forumColumn"/>
+    ,	A.FORUM_KEY
+    ,	B.CONTENT1
+    ,	B.CONTENT2
+    ,	B.CONTENT3
+    ,	B.CONTENT4	 
+    FROM FORUM_INFO AS A, FORUM_CONTENT AS B
+    WHERE A.FORUM_KEY = B.FORUM_KEY
+    AND A.STATUS = '1'
+    ORDER BY ORDER_LEVEL
+    LIMIT 0, 1
+    </select>
+    
+    <select id="getForumList" resultClass="forum">
+    /* FORUM.getForumList */
+    
+    SELECT FORUM_KEY, <include refid="forumColumn"/> FROM FORUM_INFO
+    WHERE 1=1
+    	<dynamic>
+    	    <isEqual prepend="AND" property="search_type" compareValue="1">    	        
+    	        STATUS IN ('1','2','3')
+    	    </isEqual>
+    	    
+    	    <isEqual prepend="AND" property="search_type" compareValue="2">
+    	        STATUS IN ('2')    	        
+    	    </isEqual>    	    
+    	</dynamic>
+	ORDER BY ORDER_LEVEL    	
+    </select>
+    
+    <update id="deleteForumInfo">
+    /* FORUM.deleteForumInfo */
+    
+    UPDATE FORUM_INFO SET
+    	MOD_DATE = NOW()
+    ,	STATUS = '4'
+    WHERE FORUM_KEY = #forum_key#
+    </update>
+    
+    <insert id="insertSpeakerInfo">
+    /* FORUM.insertSpeakerInfo */
+    
+    INSERT INTO FORUM_SPEAKER_INFO
+    (
+    	FORUM_KEY
+    ,	KIND
+    ,	SPEAKER_KIND_DETAIL
+    ,	NAME
+    ,	COUNTRY
+    ,	BELONG
+    ,	SUBJECT
+    ,	CONTENT
+    ,	PROFILE_PHOTO
+    ,	ORDER_LEVEL
+    ,	STATUS
+    ,	REG_DATE
+    ,	MOD_DATE	
+    ) VALUES (
+    	#forum_key#
+    ,	#kind#
+    ,	#speaker_kind_detail#
+    ,	#name#
+    ,	#country#
+    ,	#belong#
+    ,	#subject#
+    ,	#content#
+    ,	#profile_photo#
+    ,	#order_level#
+    ,	#status#
+    ,	NOW()
+    ,	NOW()
+    )	  
+    </insert>
+    
+    <update id="updateSpeakerInfo">
+    /* FORUM.updateSpeakerInfo */    
+    
+    UPDATE FORUM_SPEAKER_INFO SET
+    	KIND = #kind#
+    ,	SPEAKER_KIND_DETAIL = #speaker_kind_detail#
+    ,	NAME = #name#
+    ,	COUNTRY = #country#
+    ,	BELONG = #belong#
+    ,	SUBJECT = #subject#
+    ,	CONTENT = #content#
+    ,	PROFILE_PHOTO = #profile_photo#
+    ,	ORDER_LEVEL = #order_level#
+    ,	STATUS = #status#
+    ,	MOD_DATE = NOW()
+    WHERE SPEAKER_KEY = #speaker_key#
+    AND FORUM_KEY = #forum_key#	   
+    </update>
+    
+    <update id="deleteSpeakerInfo">
+    /* FORUM.deleteSpeakerInfo */    
+    
+    UPDATE FORUM_SPEAKER_INFO SET
+    	STATUS = 'D'
+    ,	MOD_DATE = NOW()
+    WHERE SPEAKER_KEY = #speaker_key#
+    AND FORUM_KEY = #forum_key#	   
+    </update>
+    
+    <select id="getSpeakerInfo" resultClass="speaker">
+    /* FORUM.getSpeakerInfo */    
+    
+    SELECT <include refid="speakerColumn"/> FROM FORUM_SPEAKER_INFO
+    WHERE FORUM_KEY = #forum_key#
+    AND SPEAKER_KEY = #speaker_key#    
+    </select>
+    
+    <select id="getSpeakerTotalCount" resultClass="int">
+    /* FORUM.getSpeakerTotalCount */    
+    
+    
+   	SELECT COUNT(*) AS TOTAL_COUNT FROM FORUM_SPEAKER_INFO
+    WHERE FORUM_KEY = #forum_key#
+    <include refid="speakerSearch"/>
+    </select>
+    
+    <select id="getSpeakerList" resultClass="speaker">
+    /* FORUM.getSpeakerList */    
+    
+    SELECT A.*, B.KIND_NAME FROM 
+    	(
+    	SELECT <include refid="speakerColumn"/> FROM FORUM_SPEAKER_INFO
+	    WHERE FORUM_KEY = #forum_key#
+	    <include refid="speakerSearch"/>
+	    ORDER BY ORDER_LEVEL
+	    LIMIT #recordRowNum# , #pageSize#	
+    	) AS A
+    LEFT JOIN FORUM_SPEAKER_KIND AS B
+    ON A.KIND = B.KIND	
+    ORDER BY A.ORDER_LEVEL    
+    </select>
+    
+    <select id="getSpeakerKindList" resultClass="speakerKind">
+    /* FORUM.getSpeakerKindList */
+    
+    SELECT KIND, KIND_NAME FROM FORUM_SPEAKER_KIND
+    WHERE STATUS = 'Y'   
+    ORDER BY ORDER_LEVEL    
+    </select>
+    
+    
+    
+</sqlMap>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+
+<!-- Definitions for Tiles documentation   -->
+<tiles-definitions>
+  	
+	<!-- =======================================================  	-->
+	<!-- Layout definition  									  										   	-->
+	<!-- =======================================================  	-->
+	<!-- Doc index page description  -->
+	  	
+	<!-- siteManage -->
+	<definition name="siteManage/*" extends="admin.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/admin/{1}.jsp"/>
+  	</definition>  	
+  	<definition name="siteManage/*/*" extends="admin.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/admin/{1}/{2}.jsp"/>
+  	</definition>
+  	<definition name="siteManage/*/*/*" extends="admin.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/admin/{1}/{2}/{3}.jsp"/>
+  	</definition>
+  	
+    <!-- front -->  	
+  	<definition name="front/*" extends="front.layout">
+		<put-attribute name="content"	value="/WEB-INF/views/front/{1}.jsp"/>
+  	</definition>  	
+  	<definition name="front/*/*" extends="front.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/front/{1}/{2}.jsp"/>
+  	</definition>
+  	<definition name="front/*/*/*" extends="front.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/front/{1}/{2}/{3}.jsp"/>
+  	</definition>
+  	<definition name="front/*/*/*/*" extends="front.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/front/{1}/{2}/{3}/{4}.jsp"/>
+  	</definition>
+  	  	<!-- frontvr -->
+    <definition name="frontvr/*" extends="frontvr.layout">
+        <put-attribute name="content"   value="/WEB-INF/views/frontvr/{1}.jsp"/>
+    </definition>
+
+    <definition name="frontvr/*/*" extends="frontvr.layout">
+        <put-attribute name="content"   value="/WEB-INF/views/frontvr/{1}/{2}.jsp"/>
+    </definition>
+    
+    <definition name="frontvr/*/*/*" extends="frontvr.layout">
+        <put-attribute name="content"   value="/WEB-INF/views/frontvr/{1}/{2}/{3}.jsp"/>
+    </definition>
+    
+    <definition name="frontvr/*/*/*/*" extends="frontvr.layout">
+        <put-attribute name="content"   value="/WEB-INF/views/frontvr/{1}/{2}/{3}/{4}.jsp"/>
+    </definition>
+  	<!-- empty -->
+  	<definition name="empty/*/*" extends="empty.layout">
+		<put-attribute name="content"	value="/WEB-INF/views/{1}/{2}.jsp"/>
+  	</definition>
+  	
+  	<definition name="empty/*/*/*" extends="empty.layout">
+		<put-attribute name="content"	value="/WEB-INF/views/{1}/{2}/{3}.jsp"/>
+  	</definition>
+  	
+  	<definition name="empty/*/*/*/*" extends="empty.layout">
+		<put-attribute name="content"	value="/WEB-INF/views/{1}/{2}/{3}/{4}.jsp"/>
+  	</definition>
+  	  	
+  	<!-- admin.layout -->
+	<definition name="admin.layout" template="/WEB-INF/views/template/adminLayout.jsp">
+		<put-attribute name="header" 	value="/WEB-INF/views/template/adminHeader.jsp"/>						
+		<put-attribute name="top" 		value="/WEB-INF/views/template/adminTop.jsp"/>
+		<put-attribute name="left" 		value="/WEB-INF/views/template/adminLeft.jsp"/>
+		<put-attribute name="location" 	value="/WEB-INF/views/template/adminLocation.jsp"/>
+		<put-attribute name="footer" 	value="/WEB-INF/views/template/adminFooter.jsp"/>
+		<put-attribute name="content"	/>		
+  	</definition>
+  	
+  	<!-- front.layout -->
+	<definition name="front.layout" template="/WEB-INF/views/template/frontLayout.jsp">
+		<put-attribute name="header" 	value="/WEB-INF/views/template/frontHeader.jsp"/>						
+		<put-attribute name="top" 		value="/WEB-INF/views/template/frontTop.jsp"/>		
+		<put-attribute name="menuTitle" 	value="/WEB-INF/views/template/frontSubMenuTitle.jsp"/>
+		<put-attribute name="content"	/>
+		<put-attribute name="footer"		value="/WEB-INF/views/template/frontFooter.jsp"/>
+  	</definition>
+  	<definition name="front.main.layout" template="/WEB-INF/views/template/frontMainLayout.jsp">
+		<put-attribute name="header" 	value="/WEB-INF/views/template/frontHeader.jsp"/>						
+		<put-attribute name="top" 		value="/WEB-INF/views/template/frontTop.jsp"/>						
+		<put-attribute name="content"	value="/WEB-INF/views/front/index.jsp"/>
+		<put-attribute name="footer"		value="/WEB-INF/views/template/frontFooter.jsp"/>
+  	</definition>
+  	
+ 	    <!-- frontvr.layout -->
+     <definition name="frontvr.layout" template="/WEB-INF/views/template/frontVRMainLayout.jsp">
+        <put-attribute name="header"    value="/WEB-INF/views/template/frontVRHeader.jsp"/>                       
+        <put-attribute name="top"       value="/WEB-INF/views/template/frontVRTop.jsp"/>                      
+        <put-attribute name="content"   />
+        <put-attribute name="footer"        value="/WEB-INF/views/template/frontFooter.jsp"/>
+    </definition>
+  	<!-- =======================================================	-->
+	<!-- empty.layout											  										      	-->
+	<!-- =======================================================  	-->
+	<definition name="empty.layout" template="/WEB-INF/views/template/commonEmptyLayout.jsp">								
+		<put-attribute name="content"	/>		
+  	</definition>
+  	
+  	<!-- =======================================================	-->
+	<!-- Common Message								  										      	-->
+	<!-- =======================================================  	-->
+  	<definition name="common.message" extends="empty.layout">		
+		<put-attribute name="content"	value="/WEB-INF/views/comm/redirectView.jsp"/>
+  	</definition>
+  	
+</tiles-definitions>

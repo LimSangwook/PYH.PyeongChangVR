@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="POPUP">
+	
+    <typeAlias alias="popup" type="com.module.popup.dto.PopupDto"/>
+    
+    <sql id="column">
+    	POPUP_KEY
+    ,	TITLE
+    ,	KIND
+    ,	LINK_ADDRESS    
+    ,	IS_NEW_WINDOW
+    ,	WIDTH_SIZE
+   	,	HEIGHT_SIZE
+   	,	TOP_MARGIN
+   	,	LEFT_MARGIN
+   	,	START_SHOW_DATE
+   	,	END_SHOW_DATE
+   	,	REAL_FILE_NAME
+   	,	SAVE_FILE_NAME
+   	,	FILE_PATH
+   	,	STATUS
+   	,	REG_DATE	
+    </sql>
+
+	<update id="updatePopupFileInfo">
+	/* POPUP.updatePopupFileInfo */
+	
+	UPDATE POPUP_INFO SET
+   		REAL_FILE_NAME = #real_file_name#
+   	,	SAVE_FILE_NAME = #save_file_name#
+   	,	FILE_PATH = #file_path#
+   	WHERE POPUP_KEY = #popup_key#
+	</update>
+	
+	<insert id="insertPopupInfo">
+	/*	POPUP.insertPopupInfo */
+	
+	INSERT INTO POPUP_INFO
+	(
+		TITLE
+	,	KIND	
+    ,	LINK_ADDRESS
+    ,	IS_NEW_WINDOW
+    ,	WIDTH_SIZE
+   	,	HEIGHT_SIZE
+   	,	TOP_MARGIN
+   	,	LEFT_MARGIN
+   	,	START_SHOW_DATE
+   	,	END_SHOW_DATE
+   	,	REAL_FILE_NAME
+   	,	SAVE_FILE_NAME
+   	,	FILE_PATH
+   	,	STATUS
+   	,	REG_DATE
+   	,	MOD_DATE
+	) VALUES (
+		#title#
+	,	#kind#	
+    ,	#link_address#
+    ,	#is_new_window#
+    ,	#width_size#
+   	,	#height_size#
+   	,	#top_margin#
+   	,	#left_margin#
+   	,	#start_show_date#
+   	,	#end_show_date#
+   	,	#real_file_name#
+   	,	#save_file_name#
+   	,	#file_path#
+   	,	#status#
+   	,	NOW()
+   	,	NOW()
+	)
+	
+		<selectKey resultClass="int" >
+		SELECT @@IDENTITY AS POPUP_KEY
+		</selectKey>
+	</insert>
+	
+	<update id="updatePopupInfo">
+	/* POPUP.updatePopupInfo */
+	
+	UPDATE POPUP_INFO SET
+		MOD_DATE  = NOW()
+	,	KIND = #kind#	
+	,	TITLE = #title#	
+	,	LINK_ADDRESS = #link_address#
+	,	IS_NEW_WINDOW = #is_new_window#
+    ,	WIDTH_SIZE = #width_size#
+   	,	HEIGHT_SIZE = #height_size#
+   	,	TOP_MARGIN = #top_margin#
+   	,	LEFT_MARGIN = #left_margin#
+   	,	START_SHOW_DATE = #start_show_date#
+   	,	END_SHOW_DATE = #end_show_date#
+   	,	REAL_FILE_NAME = #real_file_name#
+   	,	SAVE_FILE_NAME = #save_file_name#
+   	,	FILE_PATH = #file_path#
+   	,	STATUS = #status#
+   	WHERE POPUP_KEY = #popup_key#
+	</update>
+	
+	<update id="deletePopupInfo">
+	/* POPUP.deletePopupInfo */
+	
+	UPDATE POPUP_INFO SET
+		MOD_DATE  = NOW()
+   	,	STATUS = 'D'
+   	WHERE POPUP_KEY = #popup_key#
+	</update>
+	
+	<select id="getPopupInfo" resultClass="popup">
+	/* POPUP.getPopupInfo */
+	
+	SELECT <include refid="column"/> FROM POPUP_INFO
+	WHERE STATUS IN ('Y','N')
+	AND POPUP_KEY = #popup_key#
+	</select>
+	
+	<select id="getPopupTotalCount" resultClass="int">
+	/* POPUP.getPopupTotalCount */
+	
+	SELECT COUNT(*) AS TOTAL_COUNT FROM POPUP_INFO
+	WHERE STATUS IN ('Y','N')
+	</select>
+	
+	<select id="getPopupList" resultClass="popup">
+	/* POPUP.getPopupList */
+	
+	SELECT 
+		<include refid="column"/>
+	<![CDATA[
+	,	CASE 
+		WHEN START_SHOW_DATE <= date_format(sysdate(),'%Y-%m-%d') 
+			AND END_SHOW_DATE >= date_format(sysdate(),'%Y-%m-%d') THEN 'Y'
+		ELSE 'N' 
+		END AS IS_SHOW_YN
+	]]>			 
+	FROM POPUP_INFO
+	WHERE STATUS IN ('Y','N')
+	ORDER BY POPUP_KEY DESC
+	LIMIT #recordRowNum# , #pageSize#
+	</select>
+	
+	<select id="getMainPopupList" resultClass="popup">
+	/* POPUP.getMainPopupList */
+	
+	SELECT 
+		<include refid="column"/>
+	<![CDATA[
+	,	CASE 
+		WHEN START_SHOW_DATE <= date_format(sysdate(),'%Y-%m-%d') 
+			AND END_SHOW_DATE >= date_format(sysdate(),'%Y-%m-%d') THEN 'Y'
+		ELSE 'N' 
+		END AS IS_SHOW_YN
+	]]>	
+	FROM POPUP_INFO
+	WHERE STATUS = 'Y'
+	HAVING IS_SHOW_YN = 'Y'
+	</select>
+	
+</sqlMap>

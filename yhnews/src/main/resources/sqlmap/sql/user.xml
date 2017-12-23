@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="USER">
+	
+    <typeAlias alias="user" type="com.module.user.dto.UserDto"/>
+    
+    <sql id="userColumn">    	
+    	USER_ID
+    ,	USER_NAME
+    ,	EMAIL
+    ,	PHONE
+    ,	AUTH_LEVEL
+    ,	IS_SMS_USE
+    ,	IS_EMAIL_USE
+    ,	STATUS    
+    ,	REG_DATE
+    </sql>
+
+	<sql id="userSearch">
+		AND STATUS IN ('Y','N')
+		<isNotEmpty prepend="AND" property="search_keyword">
+			<isEqual property="search_column" compareValue="1">
+				USER_NAME LIKE #db_search_keyword#
+			</isEqual>
+			<isEqual property="search_column" compareValue="2">
+				USER_ID LIKE #db_search_keyword#
+			</isEqual>
+		</isNotEmpty>
+		<isEqual property="search_type" compareValue="admin">
+			AND AUTH_LEVEL > 1
+		</isEqual>
+		<isEqual property="search_type" compareValue="member">
+			AND AUTH_LEVEL = 1
+		</isEqual>
+	</sql>
+	
+	<sql id="userOrder">
+		<dynamic>
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="1"> REG_DATE </isEqual>
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="2"> USER_NAME </isEqual>						
+			<isEqual prepend="ORDER BY" property="order_column" compareValue="3"> USER_ID </isEqual>			
+		</dynamic>		
+	</sql>
+	
+	<select id="getUserTotalCount" resultClass="int">
+	/* USER.getUserTotalCount */
+	
+	SELECT COUNT(*) AS TOTAL_COUNT FROM USER_INFO
+	WHERE 1=1
+	<include refid="userSearch"/>
+	</select>
+	
+	<select id="getUserList" resultClass="user">	   
+	/* USER.getUserList */
+	
+	SELECT 
+		<include refid="userColumn"/>	 
+	FROM USER_INFO
+	WHERE 1=1
+	<include refid="userSearch"/>
+	<include refid="userOrder" />	
+	<dynamic>
+		<isEqual prepend=" " property="order_type" compareValue="A">ASC</isEqual>
+		<isEqual prepend=" " property="order_type" compareValue="D">DESC</isEqual>
+	</dynamic>		
+	LIMIT #recordRowNum# , #pageSize#
+	</select>
+
+	<select id="userIdDoubleCheck" resultClass="int">
+    /*	USER.userIdDoubleCheck */
+    
+    SELECT COUNT(*) AS CNT FROM USER_INFO
+    WHERE USER_ID = #user_id#	    
+	</select>
+	
+	<insert id="insertUserInfo">
+	/* USER.insertUserInfo */
+	
+	INSERT INTO USER_INFO
+	(
+		USER_ID
+	,	USER_NAME
+	,	PASSWD
+	,	EMAIL
+	,	PHONE
+	,	IS_EMAIL_USE
+	,	IS_SMS_USE
+	,	AUTH_LEVEL
+	,	STATUS	
+	,	REG_DATE
+	,	MOD_DATE	
+	) VALUES (
+		#user_id#
+	,	#user_name#
+	,	#passwd#
+	,	#email#
+	,	#phone#	
+	,	#is_email_use#
+	,	#is_sms_use#
+	,	#auth_level#
+	,	#status#
+	,	NOW()
+	,	NOW()
+	)
+	</insert>
+	
+	<insert id="insertUserIdentityInfo">
+	/* USER.insertUserIdentityInfo */
+	
+	INSERT INTO USER_IDENTITY_INFO
+	(
+		USER_ID
+	,	IS_AGREE1
+	,	IS_AGREE2
+	,	BIRTH_DAY
+	,	ZIP_CODE
+	,	ADDRESS1
+	,	ADDRESS2
+	,	IDENTITY_TYPE
+	,	DI_KEY	
+	) VALUES (
+		#user_id#
+	,	#is_agree1#
+	,	#is_agree2#
+	,	#birth_day#
+	,	#zip_code#
+	,	#address1#
+	,	#address2#
+	,	#identity_type#
+	,	#di_key#
+	) ON DUPLICATE KEY UPDATE 
+		USER_ID = #user_id#
+	,	ZIP_CODE = #zip_code#
+	,	ADDRESS1 = #address1#
+	,	ADDRESS2 = #address2#
+	</insert>	
+	
+	<update id="updateUserInfo">
+	/* USER.updateUserInfo */
+	
+	UPDATE USER_INFO SET
+		MOD_DATE = NOW()
+	,	USER_NAME = #user_name#
+	,	EMAIL = #email#
+	,	PHONE = #phone#
+	<dynamic>	
+		<isNotEmpty property="passwd">
+		,	PASSWD = #passwd#
+		</isNotEmpty>
+		<isNotEmpty property="auth_level">		
+		,	AUTH_LEVEL = #auth_level#
+		</isNotEmpty>
+		<isNotEmpty property="status">
+		,	STATUS = #status#
+		</isNotEmpty>
+	</dynamic>
+	WHERE USER_ID = #user_id#	
+	</update>
+	
+	<update id="updateMyInfo">
+	/* USER.updateMyInfo */
+	
+	UPDATE USER_INFO SET
+		MOD_DATE = NOW()
+	,	USER_NAME = #user_name#
+	,	EMAIL = #email#
+	,	PHONE = #phone#
+	,	IS_EMAIL_USE = #is_email_use#
+	,	IS_SMS_USE = #is_sms_use#
+	<dynamic>	
+		<isNotEmpty property="passwd">
+		,	PASSWD = #passwd#
+		</isNotEmpty>
+	</dynamic>
+	WHERE USER_ID = #user_id#	
+	</update>
+	
+	<update id="deleteUserInfo">
+	/* USER.deleteUserInfo */
+	
+	UPDATE USER_INFO SET 
+		STATUS = 'D'
+	,	MOD_DATE = NOW()
+	WHERE USER_ID = #user_id#
+	</update>
+	
+	<select id="getUserInfo" resultClass="user">	   
+	/* USER.getUserInfo */
+	
+	SELECT 
+		<include refid="userColumn"/>	 
+	FROM USER_INFO
+	WHERE USER_ID = #user_id#
+	AND STATUS IN ('Y','N')
+	</select>
+	
+	<select id="getAdminLoginInfo" resultClass="user">	   
+	/* USER.getAdminLoginInfo */
+	
+	SELECT 
+		<include refid="userColumn"/>		 
+	FROM USER_INFO
+	WHERE USER_ID = #user_id#
+	AND PASSWD = #passwd#
+	AND STATUS = 'Y'
+	<![CDATA[
+	AND AUTH_LEVEL > 1
+	]]>
+	</select>
+	
+	<select id="getMemberLoginInfo" resultClass="user">	   
+	/* USER.getMemberLoginInfo */
+	
+	SELECT 
+		<include refid="userColumn"/>		 
+	FROM USER_INFO
+	WHERE USER_ID = #user_id#
+	AND PASSWD = #passwd#
+	AND STATUS = 'Y'
+	<![CDATA[
+	AND AUTH_LEVEL = 1
+	]]>
+	</select>
+	
+	<update id="updateUserIdBlock">
+	/* USER.updateUserIdBlock */
+	
+	UPDATE USER_INFO SET 
+		STATUS = 'N'
+	,	MOD_DATE = NOW()
+	WHERE USER_ID = #user_id#
+	AND STATUS = 'Y'
+	</update>
+	
+	<select id="isMemberJoin" resultClass="int">
+	/* USER.isMemberJoin */    
+	
+	SELECT COUNT(*) AS CNT FROM USER_INFO AS A
+	INNER JOIN USER_IDENTITY_INFO AS B
+	ON A.USER_ID = B.USER_ID	
+	AND B.DI_KEY = #di_key#    
+	</select>
+	
+	<select id="getMemberFindInfo" resultClass="user">
+	/* USER.getMemberFindInfo */    
+	
+	SELECT A.USER_ID, IS_EMAIL_USE, IS_SMS_USE FROM USER_INFO AS A
+	INNER JOIN USER_IDENTITY_INFO AS B
+	ON A.USER_ID = B.USER_ID	
+	AND A.STATUS = 'Y'
+	AND A.AUTH_LEVEL = '1'
+	AND B.DI_KEY = #di_key#
+	<isNotEmpty prepend="AND" property="user_id">
+	    A.USER_ID = #user_id#
+	</isNotEmpty>
+	</select>
+	
+	<update id="updateMemberImsiPw">
+	/* USER.updateMemberImsiPw */    
+	
+	UPDATE USER_INFO SET
+		MOD_DATE = NOW()
+	,	PASSWD = #passwd#
+	WHERE USER_ID = #user_id#		    
+	</update>
+	
+	<select id="getUserIdentityInfo" resultClass="user">
+	/* USER.getUserIdentityInfo */    
+	
+	SELECT 
+		IS_AGREE1
+	,	IS_AGREE2
+	,	BIRTH_DAY
+	,	ZIP_CODE
+	,	ADDRESS1
+	,	ADDRESS2
+	FROM USER_IDENTITY_INFO
+	WHERE USER_ID = #user_id# 
+	</select>
+	
+	<update id="updateUserIdentityInfo">
+	/* USER.updateUserIdentityInfo */
+	
+	UPDATE USER_IDENTITY_INFO SET
+		ZIP_CODE = #zip_code#
+	,	ADDRESS1 = #address1#
+	,	ADDRESS2 = #address2#    
+	WHERE USER_ID = #user_id#    
+	</update>
+	
+	<insert id="snsLoginInfoSave">
+	/* USER.snsLoginInfoSave */
+	
+	INSERT INTO SNS_LOGIN_INFO
+	(
+		SNS_LOGIN_ID
+	,	SNS_TYPE
+	,	NICK_NAME
+	,	REG_DATE
+	,	LAST_LOGIN_DATE		
+	) VALUES (
+		#sns_login_id#
+	,	#sns_type#
+	,	#nick_name#
+	,	NOW()
+	,	NOW()
+	) ON DUPLICATE KEY UPDATE 
+		SNS_LOGIN_ID = #sns_login_id#
+	,	SNS_TYPE = #sns_type#
+	,	NICK_NAME = #nick_name#
+	,	LAST_LOGIN_DATE = NOW()	  
+	    
+	</insert>
+	
+</sqlMap>

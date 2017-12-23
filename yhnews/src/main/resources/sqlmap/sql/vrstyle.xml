@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="VRSTYLE">
+    
+    <typeAlias alias="vrStyleLinkDto" type="com.module.vr.dto.VrStyleLinkDto"/>
+    <typeAlias alias="vrStyleGalleryDto" type="com.module.vr.dto.VrStyleGalleryDto"/>
+    <typeAlias alias="vrStyleGalleryImageDto" type="com.module.vr.dto.VrStyleGalleryImageDto"/>
+    <typeAlias alias="vrStyleMovieDto" type="com.module.vr.dto.VrStyleMovieDto"/>
+    <typeAlias alias="vrStyleMusicDto" type="com.module.vr.dto.VrStyleMusicDto"/>
+
+    <!-- VrStyle Link -->
+    <select id="getVrStyleLinkList" resultClass="vrStyleLinkDto">
+    /* VRSITE.getVrStyleLinkList */
+        SELECT *, DATE(CONVERT_TZ(  A.mod_date, 'UTC', 'Asia/Seoul' )) as mod_only_date 
+        FROM VR_STYLE_LINK  as A
+        WHERE 1=1 
+        AND STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <select id="getVrStyleLinkForm" resultClass="vrStyleLinkDto">
+    /* VRSITE.getVrStyleLinkForm */
+        SELECT *   
+        FROM VR_STYLE_LINK
+        WHERE 1=1 
+        AND VR_STYLE_LINK_ID = #vr_style_link_id#
+        AND STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <insert id="insertVrStyleLink">
+    /* VRSITE.insertVrStyleLink */
+    INSERT INTO VR_STYLE_LINK
+    (
+        TITLE,
+        PATH_IMAGE,
+        OVER_SIZE,
+        OUT_SIZE,
+        STATUS,
+        MOD_DATE
+    )
+    VALUES
+    (
+        #title#,
+        #path_image#,
+        #over_size#,
+        #out_size#,
+        'Y',
+        NOW()
+    )
+    </insert>
+    <update id="updateVrStyleLink">
+    UPDATE VR_STYLE_LINK SET
+    	   MOD_DATE = NOW(),
+    	   <isNotEmpty>TITLE = #title#,</isNotEmpty>
+    	   <isNotEmpty>OVER_SIZE = #over_size#,</isNotEmpty>
+    	   <isNotEmpty>OUT_SIZE = #out_size#</isNotEmpty>
+    WHERE VR_STYLE_LINK_ID = #vr_style_link_id#
+    </update>
+    <update id="deleteVrStyleLink">
+    UPDATE VR_STYLE_LINK SET
+    	   MOD_DATE = NOW(),
+    	   STATUS = 'D'
+    WHERE VR_STYLE_LINK_ID = #vr_style_link_id#
+    </update>
+    <!-- VrStyleGallery -->
+    <select id="getVrStyleGalleryList" resultClass="vrStyleGalleryDto">
+    /* VRSITE.getVrStyleGalleryList */
+        SELECT A.*, B.title as vr_site_title , DATE(CONVERT_TZ(  A.mod_date, 'UTC', 'Asia/Seoul' )) as mod_only_date
+        FROM VR_STYLE_GALLERY as A, VR_SITE  as B
+        WHERE 1=1 
+        AND A.VR_SITE_ID = B.VR_SITE_ID
+        AND A.STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <select id="getVrStyleGalleryForm" resultClass="vrStyleGalleryDto">
+    /* VRSITE.getVrStyleLinkForm */
+        SELECT *  
+        FROM VR_STYLE_GALLERY
+        WHERE 1=1 
+        AND VR_STYLE_GALLERY_ID = #vr_style_gallery_id#
+        AND STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <insert id="insertVrStyleGallery">
+    	INSERT INTO VR_STYLE_GALLERY
+		(
+			TITLE,
+			VR_SITE_ID,
+			STATUS,
+			MOD_DATE
+		)
+		VALUES
+		(
+			#title#,
+			#vr_site_id#,
+			'Y',
+			NOW()
+		)
+    	<selectKey keyProperty="vr_style_gallery_id" resultClass="string">
+        SELECT LAST_INSERT_ID()
+   		</selectKey>
+    </insert>
+    <update id="updateVrStyleGallery">
+    </update>
+    <update id="deleteVrStyleGallery">
+    </update>
+    <select id="getVrStyleGalleryImageList" resultClass="vrStyleGalleryImageDto">
+   	/* VRSITE.getVrStyleGalleryList */
+        SELECT *
+		FROM VR_STYLE_GALLERY_IMAGE
+        WHERE 1=1 
+        AND VR_STYLE_GALLERY_ID = #vr_style_gallery_id#
+    </select>
+    <insert id="insertVrStyleGalleryImage">
+    	INSERT INTO VR_STYLE_GALLERY_IMAGE
+		(
+			PATH_IMAGE,
+			VR_STYLE_GALLERY_ID
+		)
+		VALUES
+		(
+			#path_image#,
+			#vr_style_gallery_id#
+		)
+    </insert>
+    
+    <!-- VrStyleMovie -->
+    <select id="getVrStyleMovieList" resultClass="vrStyleMovieDto">
+    /* VRSITE.getVrStyleMovieList */
+        SELECT A.*, 
+        B.TITLE as vr_site_title,
+        DATE(CONVERT_TZ(  A.mod_date, 'UTC', 'Asia/Seoul' )) as mod_only_date
+        FROM VR_STYLE_MOVIE as A, VR_SITE as B
+        WHERE 1=1 
+        and A.VR_SITE_ID = B.VR_SITE_ID
+        AND A.STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <select id="getVrStyleMovieForm" resultClass="vrStyleMovieDto">
+    /* VRSITE.getVrStyleMovieForm */
+        SELECT *  
+        FROM VR_STYLE_MOVIE
+        WHERE 1=1 
+        AND VR_STYLE_MOVIE_ID = #vr_style_movie_id#
+        AND STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <insert id="insertVrStyleMovie">
+    /* VRSITE.insertVrStyleMovie */
+    INSERT INTO VR_STYLE_MOVIE
+    (
+        TITLE,
+        VR_SITE_ID,
+        URL,
+        STATUS,
+        MOD_DATE
+    )
+    VALUES
+    (
+        #title#,
+        #vr_site_id#,
+        #url#,
+        'Y',
+        NOW()
+    )
+    </insert>
+    <update id="updateVrStyleMovie">
+    UPDATE VR_STYLE_MOVIE SET
+           STATUS = 'Y',
+           <isNotEmpty property="title">
+           TITLE = #title#,
+           </isNotEmpty>
+           <isNotEmpty property="vr_site_id">
+           VR_SITE_ID = #vr_site_id#,
+           </isNotEmpty>
+           <isNotEmpty property="url">
+           URL = #url#
+           </isNotEmpty>
+    WHERE VR_STYLE_MOVIE_ID = #vr_style_movie_id#
+    </update>
+    <update id="deleteVrStyleMovie">
+    UPDATE VR_STYLE_MOVIE SET
+           STATUS = 'D',
+    WHERE VR_STYLE_MOVIE_ID = #vr_style_movie_id#
+    </update>
+    <!-- VrStyleMusic -->
+    <select id="getVrStyleMusicList" resultClass="vrStyleMusicDto">
+    /* VRSITE.getVrStyleMusicList */
+        SELECT *, DATE(CONVERT_TZ(  A.mod_date, 'UTC', 'Asia/Seoul' )) as mod_only_date
+        FROM VR_STYLE_MUSIC  as A
+        WHERE 1=1 
+        AND STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <select id="getVrStyleMusicForm" resultClass="vrStyleMusicDto">
+    /* VRSITE.getVrStyleMovieForm */
+        SELECT *  
+        FROM VR_STYLE_MUSIC
+        WHERE 1=1 
+        AND VR_STYLE_MUSIC_ID = #vr_style_music_id#
+        AND STATUS IN ('Y','N')
+        LIMIT #recordRowNum# , #pageSize#
+    </select>
+    <insert id="insertVrStyleMusic">
+    /* VRSITE.insertVrStyleMusic */
+    INSERT INTO VR_STYLE_MUSIC
+    (
+        TITLE,
+        PATH_FILE,
+        VOLUME,
+        AUTO_PLAY,
+        REPEAT_PLAY,
+        HFOV,
+        ROLL,
+        PITCH,
+        YAW,
+        STATUS,
+        MOD_DATE
+    )
+    VALUES
+    (
+        #title#,
+        #path_file#,
+        #volume#,
+        #auto_play#,
+        #repeat_play#,
+        #hfov#,
+        #roll#,
+        #pitch#,
+        #yaw#,
+        'Y',
+        NOW()
+    )
+    </insert>
+    <update id="updateVrStyleMusic">
+    /* VRSITE.updateVrStyleMusic */
+    UPDATE VR_STYLE_MUSIC SET
+           MOD_DATE = NOW(),
+           <isNotEmpty property="title">
+           TITLE = #title#,
+           </isNotEmpty>
+           <isNotEmpty property="path_file">
+           PATH_FILE = #path_file#,
+           </isNotEmpty>
+           <isNotEmpty property="volume">
+           VOLUME = #volume#,
+           </isNotEmpty>
+           <isNotEmpty property="auto_play">
+           AUTO_PLAY = #auto_play#,
+           </isNotEmpty>
+           <isNotEmpty property="repeat_play">
+           REPEAT_PLAY = #repeat_play#,
+           </isNotEmpty>
+           <isNotEmpty property="hfov">
+           HFOV = #hfov#,
+           </isNotEmpty>
+           <isNotEmpty property="roll">
+           ROLL = #roll#,
+           </isNotEmpty>
+           <isNotEmpty property="pitch">
+           PITCH = #pitch#,
+           </isNotEmpty>
+           <isNotEmpty property="yaw">
+           YAW = #yaw#
+           </isNotEmpty>
+    WHERE VR_STYLE_MUSIC_ID = #vr_style_music_id#
+    </update>
+    <update id="deleteVrStyleMusic">
+    /* VRSITE.deleteVrStyleMusic */
+    UPDATE VR_STYLE_MUSIC SET
+           STATUS = 'D',
+           MOD_DATE = NOW()
+    WHERE VR_STYLE_MUSIC_ID = #vr_style_music_id#
+    </update>
+</sqlMap>

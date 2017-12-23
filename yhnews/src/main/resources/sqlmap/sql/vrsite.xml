@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="VRSITE">
+	
+    <typeAlias alias="vrsite" type="com.module.vr.dto.VrSiteDto"/>
+    <typeAlias alias="vrsitegroup" type="com.module.vr.dto.VrSiteGroupDto"/>
+    <typeAlias alias="vrsitecontent" type="com.module.vr.dto.VrSiteContentDto"/>
+    <typeAlias alias="vrsitecontentspot" type="com.module.vr.dto.VrSiteContentSpotDto"/>
+    
+    <sql id="vrSiteColumn">    	
+    	VR_SITE_ID
+    ,	TITLE
+    ,	PATH_ICON
+    ,	PATH_IMAGE
+    ,	STATUS
+    ,	MOD_DATE
+    </sql>
+    
+    <sql id="vrSiteSearch">
+        AND STATUS IN ('Y','N')
+        <isNotEmpty prepend="AND" property="search_keyword">
+            <isEqual property="search_column" compareValue="1">
+                TITLE LIKE #db_search_keyword#
+            </isEqual>
+        </isNotEmpty>
+    </sql>
+    
+    <select id="getVRSiteTotalCount"  resultClass="int">
+    /* VRSITE.getVRSiteTotalCount */
+    
+        SELECT COUNT(*) AS TOTAL_COUNT FROM VR_SITE        
+        WHERE STATUS IN ('Y','N')
+    </select>
+    
+	<select id="getVRSiteList" resultClass="vrsite">
+	/* VRSITE.getVRSiteList */
+		SELECT 
+            <include refid="vrSiteColumn"/>    
+		FROM VR_SITE
+		WHERE 1=1
+            <include refid="vrSiteSearch"/> 
+		LIMIT #recordRowNum# , #pageSize#
+	</select>
+
+	<select id="getVRSite" resultClass="vrsite">	   
+	/* VRSITE.getVRSite */
+		SELECT *
+		FROM VR_SITE
+		WHERE VR_SITE_ID = #vr_site_id#
+		AND STATUS IN ('Y','N')
+	</select>
+
+    <insert id="insertVRSite">
+    /* VRSITE.insertVrSite */
+    INSERT INTO VR_SITE
+    (
+        VR_SITE_ID
+    ,   TITLE
+    ,   PATH_ICON
+    ,   PATH_IMAGE
+    ,   STATUS
+    ,   MOD_DATE
+    ) VALUES (
+        #vr_site_id#
+    ,   #title#
+    ,   #path_icon#
+    ,   #path_image#
+    ,   'Y'
+    ,   NOW()
+    )
+    </insert>
+
+    <update id="updateVRSite">
+    /* VRSITE.updateVRSite */
+    
+    UPDATE VR_SITE SET
+        TITLE = #title#
+    <dynamic>
+        <isNotEmpty property="status">
+        ,   STATUS = #status#
+        </isNotEmpty>
+        <isNotEmpty property="mod_date">
+        ,   MOD_DATE = NOW()
+        </isNotEmpty>
+    </dynamic>
+    WHERE VR_SITE_ID = #vr_site_id#
+    </update>
+    
+    <update id="deleteVRSite">
+    /* VRSITE.deleteVRSite */
+    
+    UPDATE VR_SITE SET 
+        STATUS = 'D'
+    ,   MOD_DATE = NOW()
+    WHERE VR_SITE_ID = #vr_site_id#
+    </update>
+    
+    <select id="getVRSiteGroupList" resultClass="vrsitegroup">
+    /* VRSITE.getVRSiteGroupList */
+        SELECT *  
+        FROM VR_SITE_GROUP
+        WHERE 1=1 
+        AND VR_SITE_ID = #vr_site_id#
+    </select>
+    
+    <insert id="insertVrSiteGroup">
+    /* VRSITE.insertVrSiteGroup */
+    INSERT INTO VR_SITE_GROUP
+    (
+          VR_SITE_ID
+        , NAME
+        , DESCRIPTION
+    ) 
+    VALUES
+    (
+          #vr_site_id#
+        , #name#
+        , #description#
+    )
+    </insert>
+
+    <update id="updateVrSiteGroup">
+    /* VRSITE.updateVrSiteGroup */
+    UPDATE VR_SITE_GROUP SET
+           NAME = #name#
+         , DESCRIPTION = #description#
+    WHERE VR_SITE_GROUP_ID = #vr_site_group_id#
+    </update>
+
+    <delete id="deleteVrSiteGroup">
+    /* VRSITE.deleteVrSiteGroup */
+    DELETE FROM VR_SITE_GROUP
+    WHERE VR_SITE_GROUP_ID = #vr_site_group_id#
+    </delete>
+    
+    
+    <sql id="vrSiteContentColumn">    	
+    	VR_SITE_CONTENT_ID
+      , VR_SITE_ID
+      , NAME
+      , EXPOSE_ORDER
+      , VR_SITE_GROUP_ID
+      , VR_STYLE_MUSIC_ID
+      , PATH_PANORAMA_IMAGE
+      , STATUS
+      , MOD_DATE
+    </sql>
+    
+    <sql id="vrSiteContentSearch">
+        AND STATUS IN ('Y','N')
+        <isNotEmpty prepend="AND" property="search_keyword">
+            <isEqual property="search_column" compareValue="1">
+                TITLE LIKE #db_search_keyword#
+            </isEqual>
+        </isNotEmpty>
+    </sql>
+    
+	<select id="getVRSiteContentList" resultClass="vrsitecontent">
+        /* VRSITE.getVRSiteContentList */
+		SELECT
+            <include refid="vrSiteContentColumn"/>  
+		FROM VR_SITE_CONTENT
+		WHERE 1=1
+            <include refid="vrSiteContentSearch"/>
+		AND VR_SITE_ID = #vr_site_id#
+	</select>
+	
+	<select id="getVRSiteContent" resultClass="vrsitecontent">
+        /* VRSITE.getVRSiteContent */
+		SELECT 
+            <include refid="vrSiteContentColumn"/>  
+		FROM VR_SITE_CONTENT
+		WHERE VR_SITE_CONTENT_ID = #vr_site_content_id#
+		AND STATUS IN ('Y','N')
+	</select>
+    
+    <insert id="insertVrSiteContent">
+        INSERT INTO VR_SITE_CONTENT
+        (
+            VR_SITE_CONTENT_ID,
+            VR_SITE_ID,
+            NAME,
+            EXPOSE_ORDER,
+            VR_SITE_GROUP_ID,
+            VR_STYLE_MUSIC_ID,
+            PATH_PANORAMA_IMAGE,
+            STATUS,
+            MOD_DATE
+        )
+        VALUES
+        (
+            #vr_site_content_id#,
+            #vr_site_id#,
+            #name#,
+            #expose_order#,
+            #vr_site_group_id#,
+            #vr_style_music_id#,
+            #path_panorama_image#,
+            'Y',
+            NOW()
+        )
+    </insert>
+    
+    <update id="updateVrSiteContent">
+        UPDATE VR_SITE_CONTENT SET
+               MOD_DATE = NOW()
+             <isNotEmpty property="vr_site_id">
+             , VR_SITE_ID = #vr_site_id#
+             </isNotEmpty>
+             <isNotEmpty  property="name">
+             , NAME = #name#
+             </isNotEmpty>
+             <isNotEmpty  property="expose_order">
+             , EXPOSE_ORDER = #expose_order#
+             </isNotEmpty>
+             <isNotEmpty  property="vr_site_group_id">
+             , VR_SITE_GROUP_ID = #vr_site_group_id#
+             </isNotEmpty>
+             <isNotEmpty  property="vr_style_music_id">
+             , VR_STYLE_MUSIC_ID = #vr_style_music_id#
+             </isNotEmpty>
+             <isNotEmpty  property="path_panorama_image">
+             , PATH_PANORAMA_IMAGE = #path_panorama_image#
+             </isNotEmpty>
+        WHERE  1 = 1
+        AND    VR_SITE_CONTENT_ID = #vr_site_content_id#
+    </update>
+    
+    <update id="deleteVrSiteContent">
+    UPDATE VR_SITE_CONTENT SET
+           STATUS = 'D'
+         , MOD_DATE = NOW()
+    WHERE  1 = 1
+    AND    VR_SITE_CONTENT_ID = #vr_site_content_id#
+    </update>
+    
+    <sql id="vrSiteContentSpotColumn">
+          VR_SITE_CONTENT_SPOT_ID
+        , VR_SITE_CONTENT_ID
+        , NAME
+        , VR_STYLE_TYPE
+        , VR_STYLE_ID
+        , POS_X
+        , POS_Y
+        , LINK_CONTENT_ID
+    </sql>
+    
+    <select id="getVrSiteContentSpotList" resultClass="vrsitecontentspot">
+    SELECT
+        <include refid="vrSiteContentSpotColumn"/>
+    FROM VR_SITE_CONTENT_SPOT
+    WHERE VR_SITE_CONTENT_ID = #vr_site_content_id#
+    </select>
+    
+    <insert id="insertVrSiteContentSpot">
+    INSERT INTO VR_SITE_CONTENT_SPOT
+    (
+        VR_SITE_CONTENT_ID,
+        NAME,
+        VR_STYLE_TYPE,
+        VR_STYLE_ID,
+        POS_X,
+        POS_Y,
+        LINK_CONTENT_ID
+    )
+    VALUES
+    (
+        #vr_site_content_id#,
+        #name#,
+        #vr_style_type#,
+        #vr_style_id#,
+        #pos_x#,
+        #pos_y#,
+        #link_content_id#
+    )
+    </insert>
+    
+    <update id="updateVrSiteContentSpot">
+    UPDATE VR_SITE_CONTENT_SPOT SET
+           NAME = #name#
+         , VR_STYLE_TYPE = #vr_style_type#
+         , VR_STYLE_ID = #vr_style_id#
+         , POS_X = #pos_x#
+         , POS_Y = #pos_y#
+         , LINK_CONTENT_ID = #link_content_id#
+    WHERE VR_SITE_CONTENT_SPOT_ID = #vr_site_content_spot_id#
+    </update>
+    
+    <delete id="deleteVrSiteContentSpot">
+        DELETE FROM VR_SITE_CONTENT_SPOT
+        WHERE VR_SITE_CONTENT_SPOT_ID = #vr_site_content_spot_id#
+    </delete>
+</sqlMap>

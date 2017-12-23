@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="COMMON">
+	
+    <select id="getFileTotalUseSize" resultClass="long">
+    /* COMMON.getFileTotalUseSize */
+    
+    SELECT IFNULL(SUM(FILE_SIZE),0) AS TOTAL_SIZE FROM BOARD_FILE
+    </select>
+    
+    <select id="getDataBaseUseSize" resultClass="long">
+/* COMMON.getDataBaseUseSize */
+    
+    SELECT SUM(data_length+index_length) AS TOT FROM information_schema.tables 
+    
+</select>
+        
+	<select id="getCommonCodeList" resultClass="hashmap">
+	/* COMMON.getCommonCodeList */
+	
+	SELECT code, parent_code, code_name FROM COMMON_CODE
+	WHERE STATUS = 'Y'
+	AND PARENT_CODE = #parent_code#
+	ORDER BY ORDER_LEVEL
+	</select>
+	
+	<select id="getPostTotalCount" resultClass="long">
+	/* COMMON.getPostTotalCount */
+	
+	SELECT COUNT(*) FROM BOARD	WHERE STATUS = 'Y' AND ORDER_STEP = 0
+	</select>
+	
+	<select id="getPostReplyTotalCount" resultClass="long">
+	/* COMMON.getPostReplyTotalCount */
+	
+	SELECT COUNT(*) FROM BOARD	WHERE STATUS = 'Y' AND ORDER_STEP > 0
+	</select>
+	
+	<select id="getMemberTotalCount" resultClass="long">
+	/* COMMON.getMemberTotalCount */
+	
+	SELECT COUNT(*) FROM USER_INFO WHERE STATUS = 'Y' AND AUTH_LEVEL = 1	 
+	</select>
+	
+	<select id="getSiteServiceLangList" resultClass="hashmap">
+	/* COMMON.getSiteServiceLangList */
+	
+	SELECT lang_code, lang_name FROM SYS_LANG_SET
+	WHERE STATUS = 'Y'	
+	ORDER BY ORDER_LEVEL
+	</select>
+	
+</sqlMap>
